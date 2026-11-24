@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="theme-color" content="#060B14" />
+<title>S7 Global HQ | Mobile Command App</title>
+<style>
+:root { --bg: #060B14; --card: #0F172A; --border: #1E293B; --cyan: #00E5FF; --lime: #84CC16; --text: #F8FAFC; --muted: #94A3B8; }
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+body { background: var(--bg); color: var(--text); padding-bottom: 84px; }
+header { background: var(--card); border-bottom: 1px solid var(--border); padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 17px; letter-spacing: 0.5px; }
+.badge { background: rgba(132, 204, 22, 0.15); color: var(--lime); border: 1px solid var(--lime); font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 999px; }
+.stats-bar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 12px 16px; background: #0B1221; border-bottom: 1px solid var(--border); }
+.stat-box { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 10px; text-align: center; }
+.stat-val { font-size: 18px; font-weight: 800; color: var(--cyan); }
+.stat-lbl { font-size: 11px; color: var(--muted); text-transform: uppercase; }
+.container { padding: 16px; max-width: 680px; margin: 0 auto; }
+.tab-view { display: none; }
+.tab-view.active { display: block; }
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px; margin-bottom: 14px; }
+.card h2 { font-size: 16px; font-weight: 700; color: var(--cyan); margin-bottom: 10px; }
+input, textarea, select { width: 100%; background: #060B14; border: 1px solid var(--border); color: var(--text); padding: 11px 12px; border-radius: 9px; font-size: 14px; margin-bottom: 10px; }
+.btn { width: 100%; padding: 12px; border: none; border-radius: 9px; font-weight: 700; font-size: 14px; cursor: pointer; margin-bottom: 8px; }
+.btn-cyan { background: var(--cyan); color: #060B14; }
+.btn-lime { background: var(--lime); color: #060B14; }
+.btn-outline { background: transparent; border: 1px solid var(--cyan); color: var(--cyan); }
+.client-item { background: #060B14; border: 1px solid var(--border); border-radius: 10px; padding: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+.status-pill { font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 999px; cursor: pointer; white-space: nowrap; }
+.st-deposit { background: rgba(0,229,255,0.15); color: var(--cyan); border: 1px solid var(--cyan); }
+.st-live { background: rgba(132,204,22,0.15); color: var(--lime); border: 1px solid var(--lime); }
+pre { background: #060B14; border: 1px solid var(--border); padding: 12px; border-radius: 9px; font-size: 12px; color: #E2E8F0; white-space: pre-wrap; margin-bottom: 10px; max-height: 220px; overflow-y: auto; }
+nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); border-top: 1px solid var(--border); display: grid; grid-template-columns: repeat(4, 1fr); padding: 8px 4px; z-index: 50; }
+nav button { background: none; border: none; color: var(--muted); font-size: 11px; font-weight: 600; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; padding: 6px 0; }
+nav button.active { color: var(--cyan); }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <svg width="28" height="28" viewBox="0 0 60 60" fill="none"><rect x="2" y="2" width="56" height="56" rx="14" fill="#060B14" stroke="#00E5FF" stroke-width="3"/><text x="15" y="37" fill="#84CC16" font-family="sans-serif" font-weight="900" font-size="22">S7</text></svg>
+    S7 GLOBAL HQ
+  </div>
+  <span class="badge">$250 MAP + WEB</span>
+</header>
+
+<div class="stats-bar">
+  <div class="stat-box"><div class="stat-val" id="statCollected">$0</div><div class="stat-lbl">Collected</div></div>
+  <div class="stat-box"><div class="stat-val" id="statPending">$0</div><div class="stat-lbl">Pending</div></div>
+  <div class="stat-box"><div class="stat-val" id="statClients">0</div><div class="stat-lbl">Clients</div></div>
+</div>
+
+<div class="container">
+  <!-- TAB 1: CLIENT TRACKER -->
+  <div id="tab-clients" class="tab-view active">
+    <div class="card">
+      <h2>+ Add New Shop ($125 Deposit)</h2>
+      <input type="text" id="cName" placeholder="Business Name (e.g., East Point Cuts)" />
+      <input type="text" id="cPhone" placeholder="Owner Phone (e.g., 470-555-0199)" />
+      <input type="text" id="cCity" placeholder="Neighborhood / City (e.g., East Point, GA)" />
+      <button class="btn btn-cyan" onclick="addClient()">Add Client ($125 Paid)</button>
+    </div>
+    <div class="card">
+      <h2>Active Client Pipeline (Tap Status to Toggle)</h2>
+      <div id="clientList"></div>
+    </div>
+  </div>
+
+  <!-- TAB 2: SCRIPTS & RECEIPT -->
+  <div id="tab-scripts" class="tab-view">
+    <div class="card">
+      <h2>1-Tap Pitch &amp; Receipt Generator</h2>
+      <input type="text" id="sBiz" placeholder="Target Business Name" oninput="updateTemplates()" />
+      <input type="text" id="sOwner" placeholder="Owner Name" oninput="updateTemplates()" />
+      <pre id="pitchBox"></pre>
+      <button class="btn btn-cyan" onclick="copyText('pitchBox')">Copy Cold Call / DM Pitch</button>
+      <pre id="receiptBox"></pre>
+      <button class="btn btn-lime" onclick="copyText('receiptBox')">Copy $125 Deposit Receipt</button>
+    </div>
+  </div>
+
+  <!-- TAB 3: CLIENT WEBSITE BUILDER -->
+  <div id="tab-web" class="tab-view">
+    <div class="card">
+      <h2>Instant Client Landing Page Builder</h2>
+      <input type="text" id="wName" placeholder="Shop Name" />
+      <input type="text" id="wCity" placeholder="City / Neighborhood (e.g., East Point, GA)" />
+      <input type="text" id="wPhone" placeholder="Phone Number" />
+      <input type="text" id="wAddr" placeholder="Street Address" />
+      <input type="text" id="wHours" placeholder="Hours (e.g., Mon-Sat 9am-7pm)" />
+      <input type="text" id="wServices" placeholder="Top 3 Services (comma separated)" />
+      <button class="btn btn-cyan" onclick="buildSite()">Generate Client index.html</button>
+      <pre id="siteOutput">Fill details above and tap Generate...</pre>
+      <button class="btn btn-lime" onclick="copyText('siteOutput')">Copy Client HTML for Vercel</button>
+    </div>
+  </div>
+
+  <!-- TAB 4: META MUSE PROMPTS -->
+  <div id="tab-muse" class="tab-view">
+    <div class="card">
+      <h2>Meta Muse Business Brain Prompt</h2>
+      <pre id="museBrain">Save these rules for S7 Global LLC (Marquez Spencer, East Point / Metro Atlanta, GA):
+• Offer: Flat $250 Local Visibility Package (Google Search, Google Maps, Apple Maps verification + starter website).
+• Terms: 50/50 split — $125 upfront deposit to start, $125 due ONLY when live on the map.
+• Contact: (470) 494-5855 | MarquezSpencervip@gmail.com.
+• Rule: Never send messages without my approval first.</pre>
+      <button class="btn btn-cyan" onclick="copyText('museBrain')">Copy Business Brain Prompt</button>
+    </div>
+    <div class="card">
+      <h2>Meta Muse 25-Lead Scraper Prompt</h2>
+      <pre id="museScrape">Search local directories, Instagram, and Facebook for 25 active local businesses in East Point, College Park, and Southwest Atlanta (barbershops, salons, auto repair, detailers, HVAC, restaurants) that lack a verified Google Business Profile or website. Output Business Name, Neighborhood, Phone, and Social Handle in a table.</pre>
+      <button class="btn btn-lime" onclick="copyText('museScrape')">Copy Lead Scraper Prompt</button>
+    </div>
+  </div>
+</div>
+
+<nav>
+  <button class="active" onclick="switchTab('clients', this)">Clients</button>
+  <button onclick="switchTab('scripts', this)">Scripts</button>
+  <button onclick="switchTab('web', this)">Web Builder</button>
+  <button onclick="switchTab('muse', this)">Muse AI</button>
+</nav>
+
+<script>
+let clients = JSON.parse(localStorage.getItem('s7_clients') || '[]');
+
+function switchTab(id, el) {
+  document.querySelectorAll('.tab-view').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  el.classList.add('active');
+}
+
+function addClient() {
+  const name = document.getElementById('cName').value.trim();
+  const phone = document.getElementById('cPhone').value.trim();
+  const city = document.getElementById('cCity').value.trim() || 'Atlanta, GA';
+  if (!name) return alert('Enter a business name');
+  clients.unshift({ id: Date.now(), name, phone, city, status: 'deposit' });
+  saveRender();
+  document.getElementById('cName').value = '';
+  document.getElementById('cPhone').value = '';
+  document.getElementById('cCity').value = '';
+}
+
+function toggleStatus(id) {
+  clients = clients.map(c => c.id === id ? { ...c, status: c.status === 'deposit' ? 'live' : 'deposit' } : c);
+  saveRender();
+}
+
+function saveRender() {
+  localStorage.setItem('s7_clients', JSON.stringify(clients));
+  const list = document.getElementById('clientList');
+  let collected = 0, pending = 0;
+  list.innerHTML = clients.length ? '' : '<p style="color:#94A3B8;font-size:13px;">No clients added yet. Close your first $125 deposit today!</p>';
+  clients.forEach(c => {
+    if (c.status === 'deposit') { collected += 125; pending += 125; }
+    else { collected += 250; }
+    list.innerHTML += `
+      <div class="client-item">
+        <div>
+          <div style="font-weight:700;font-size:14px;">${c.name}</div>
+          <div style="font-size:12px;color:#94A3B8;">${c.city} • ${c.phone || 'No phone'}</div>
+        </div>
+        <span class="status-pill ${c.status === 'deposit' ? 'st-deposit' : 'st-live'}" onclick="toggleStatus(${c.id})">${c.status === 'deposit' ? '$125 Paid (1/2)' : '$250 LIVE (2/2)'}</span>
+      </div>`;
+  });
+  document.getElementById('statCollected').innerText = '$' + collected;
+  document.getElementById('statPending').innerText = '$' + pending;
+  document.getElementById('statClients').innerText = clients.length;
+}
+
+function updateTemplates() {
+  const biz = document.getElementById('sBiz').value.trim() || '[Business Name]';
+  const owner = document.getElementById('sOwner').value.trim() || 'there';
+  document.getElementById('pitchBox').innerText = `Hey ${owner}, this is Marquez with S7 Global in Atlanta. I noticed ${biz} isn't fully verified on Google Maps & Apple Maps yet, which sends nearby searches straight to competitors. I get local shops live on Google Search, Google Maps & Apple Maps (plus a starter website) for a flat $250—just $125 down today to start, and the final $125 only when you're live on the map. Want me to text over the quick details?`;
+  document.getElementById('receiptBox').innerText = `S7 GLOBAL LLC — DEPOSIT RECEIPT & AGREEMENT\nClient: ${biz} (${owner})\nProvider: S7 Global LLC (Marquez Spencer | 470-494-5855)\nPackage: Google Maps + Apple Maps Verification + Starter Web Setup ($250.00 Flat)\nDeposit Paid Today: $125.00 [RECEIVED]\nBalance Due Upon Live Map Verification: $125.00\nThank you for choosing S7 Global LLC!`;
+}
+
+function buildSite() {
+  const name = document.getElementById('wName').value.trim() || 'Local Shop ATL';
+  const city = document.getElementById('wCity').value.trim() || 'East Point, GA';
+  const phone = document.getElementById('wPhone').value.trim() || '(470) 555-0100';
+  const cleanPhone = phone.replace(/\D/g, '');
+  const addr = document.getElementById('wAddr').value.trim() || 'Atlanta, GA';
+  const hours = document.getElementById('wHours').value.trim() || 'Mon–Sat: 9:00 AM – 7:00 PM';
+  const svcs = (document.getElementById('wServices').value.trim() || 'Walk-Ins, Appointments, Local Service').split(',').map(s => `<li style="padding:8px 0;border-bottom:1px solid #eee;"><strong>${s.trim()}</strong></li>`).join('');
+  document.getElementById('siteOutput').innerText = `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${name} | ${city}</title></head><body style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:16px;background:#f8fafc;color:#0f172a;"><div style="background:#060B14;color:#fff;padding:28px 20px;border-radius:14px;text-align:center;"><div style="color:#00E5FF;font-size:12px;font-weight:700;text-transform:uppercase;">Serving ${city}</div><h1 style="margin:8px 0;">${name}</h1><a href="tel:${cleanPhone}" style="display:block;background:#00E5FF;color:#060B14;padding:14px;border-radius:10px;text-decoration:none;font-weight:800;margin-top:14px;">Call Now: ${phone}</a></div><div style="background:#fff;padding:18px;border-radius:12px;margin-top:14px;"><h2>Our Services</h2><ul style="list-style:none;padding:0;">${svcs}</ul></div><div style="background:#fff;padding:18px;border-radius:12px;margin-top:14px;"><h2>Location & Hours</h2><p><strong>Address:</strong> ${addr}</p><p><strong>Hours:</strong> ${hours}</p></div><footer style="text-align:center;font-size:12px;color:#64748b;margin-top:20px;">&copy; 2026 ${name} • Verified Setup by S7 Global LLC</footer></body></html>`;
+}
+
+function copyText(id) {
+  navigator.clipboard.writeText(document.getElementById(id).innerText);
+  alert('Copied to clipboard!');
+}
+
+saveRender();
+updateTemplates();
+</script>
+</body>
+</html>
