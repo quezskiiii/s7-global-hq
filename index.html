@@ -355,7 +355,7 @@ nav button { min-height:44px; }
     <div id="tab-settings" class="tab-view">
       <div class="card">
         <h2>⚙️ Brand Settings — Owner Only</h2>
-        <p class="small" style="margin-bottom:10px;">Saved on this device only (localStorage: s7_brand_settings). These never appear as a prompt to public visitors. The public Pay Deposit button uses the built-in default Maps payment link unless you save an override below.</p>
+        <p class="small" style="margin-bottom:10px;">Saved on this device only (localStorage: s7_brand_settings). These never appear as a prompt to public visitors. The public Pay Deposit button uses the built-in default Maps payment link unless you save an override below. Lead alerts likewise POST to the built-in default Formspree endpoint unless you save an override.</p>
         <label class="fld" for="setPhone">Business Phone (reference)</label>
         <input type="tel" id="setPhone" placeholder="470-494-5855 (TEXT ONLY)" />
         <label class="fld" for="setMapPay">Maps Deposit Payment Link — Override (optional)</label>
@@ -363,9 +363,9 @@ nav button { min-height:44px; }
         <p class="small" style="margin-bottom:10px;">Built-in default (live now): <strong>https://buy.stripe.com/5kQ3cxdB72uPgSXb1zcEw10</strong> — "S7 Maps — Full Setup Deposit", $125 one-time. Paste a different link above only to override it; clear the field and save to go back to the default.</p>
         <label class="fld" for="setRePay">Real Estate Link (optional)</label>
         <input type="url" id="setRePay" placeholder="https://… (stored for owner reference)" />
-        <label class="fld" for="setWebhook">Lead Alert Webhook URL (optional)</label>
-        <input type="url" id="setWebhook" placeholder="https://formspree.io/f/… (leave blank = no alert sent)" />
-        <p class="small" style="margin-bottom:10px;">Free option: create a Formspree form endpoint (formspree.io) and paste its URL here to get lead alerts by email. When set, each new public request also POSTs a copy (tracking ID, division, name, phone, plan) to that URL. Blank = nothing is sent anywhere.</p>
+        <label class="fld" for="setWebhook">Lead Alert Webhook URL — Override (optional)</label>
+        <input type="url" id="setWebhook" placeholder="Leave blank to use the built-in default endpoint" />
+        <p class="small" style="margin-bottom:10px;">Built-in default (live now): <strong>https://formspree.io/f/mppdbovg</strong> — Formspree form "S7 HQ Leads", lead alerts emailed to marquezspencervip@gmail.com. Each new public request POSTs a copy (tracking ID, division, name, phone, plan) to the effective endpoint. Paste a different endpoint above only to override it; clear the field and save to go back to the default.</p>
         <button class="btn btn-lime" onclick="saveBrandSettings()">Save Settings to This Device</button>
       </div>
     </div>
@@ -426,8 +426,10 @@ nav button { min-height:44px; }
 
 <script>
 /* ============================================================
-   S7 GLOBAL HQ — V6.2 (default Stripe pay link hardcoded + non-Maps/RE app
-   content removed. Builds on V6 — owner playbook: Maps fulfillment checklist
+   S7 GLOBAL HQ — V6.3 (default Formspree lead-alert webhook hardcoded,
+   mirroring the V6.2 default-pay-link pattern. Builds on V6.2 — default
+   Stripe pay link hardcoded + non-Maps/RE app content removed. Builds on
+   V6 — owner playbook: Maps fulfillment checklist
    + live-proof gate, one-tap welcome text, RE deal fields, lead-alert webhook
    hook. Builds on V5 — menu drawer, scroll-spy, real order tracking, no demo data)
    1) CATALOG: single source of truth for plans/services/steps/FAQs.
@@ -544,8 +546,12 @@ const firebaseEnabled = Boolean(FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.projec
    Public visitors never see a settings prompt. V6.2: a built-in DEFAULT Maps
    payment link (real Stripe link, created by the owner) is hardcoded below, so
    the public Pay button shows out of the box. An owner-saved mapPayLink in
-   Settings OVERRIDES the default; clearing the field falls back to the default. */
+   Settings OVERRIDES the default; clearing the field falls back to the default.
+   V6.3: same pattern for the lead-alert webhook — a built-in DEFAULT Formspree
+   endpoint (owner's "S7 HQ Leads" form) is hardcoded, so lead alerts fire out
+   of the box; an owner-saved leadWebhookUrl overrides it, clearing restores it. */
 const DEFAULT_MAP_PAY_LINK = 'https://buy.stripe.com/5kQ3cxdB72uPgSXb1zcEw10';
+const DEFAULT_LEAD_WEBHOOK = 'https://formspree.io/f/mppdbovg';
 const SETTINGS_KEY = 's7_brand_settings';
 function loadSettings() {
   try { const v = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}'); return (v && typeof v === 'object' && !Array.isArray(v)) ? v : {}; }
@@ -558,6 +564,12 @@ function persistSettings() { try { localStorage.setItem(SETTINGS_KEY, JSON.strin
 function effectiveMapPayLink() {
   const saved = String(brandSettings.mapPayLink || '').trim();
   return /^https?:\/\//i.test(saved) ? saved : DEFAULT_MAP_PAY_LINK;
+}
+/* The lead-alert webhook actually used: owner-saved override wins,
+   otherwise the built-in default Formspree endpoint. */
+function effectiveLeadWebhook() {
+  const saved = String(brandSettings.leadWebhookUrl || '').trim();
+  return /^https?:\/\//i.test(saved) ? saved : DEFAULT_LEAD_WEBHOOK;
 }
 function renderSettingsPublic() {
   const slot = document.getElementById('buyerPaySlot');
@@ -581,12 +593,14 @@ function saveBrandSettings() {
   toast('Settings saved on this device');
 }
 
-/* ---------- V6: lead-alert webhook (OWNER-OPTIONAL, best-effort) ----------
-   Fires ONLY when the owner has saved a webhook URL in Settings. A failed
-   webhook must NEVER block or error the public submit flow. */
+/* ---------- lead-alert webhook (best-effort) ----------
+   V6: fired only when the owner saved a webhook URL. V6.3: fires to the
+   EFFECTIVE webhook — owner-saved override, else the built-in default
+   Formspree endpoint — so alerts fire out of the box. A failed webhook
+   must NEVER block or error the public submit flow. */
 function fireLeadWebhook(lead) {
   try {
-    const url = String(brandSettings.leadWebhookUrl || '').trim();
+    const url = effectiveLeadWebhook();
     if (!/^https?:\/\//i.test(url)) return;
     const payload = {
       trackId: lead.trackId || '', division: lead.division || '', name: lead.biz || lead.name || '',
