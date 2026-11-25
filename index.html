@@ -4,243 +4,710 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 <meta name="theme-color" content="#060B14" />
-<meta name="description" content="S7 Global HQ — client tracker, scripts, and site builder for the $250 Maps setup." />
+<meta name="description" content="S7 Global LLC — get your Metro Atlanta shop found on Google Maps & Apple Maps. Full Setup $250 flat: $125 down, $125 only when live." />
 <link rel="manifest" href="manifest.webmanifest" />
 <link rel="icon" type="image/svg+xml" href="icon.svg" />
 <link rel="apple-touch-icon" href="icon.svg" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-<title>S7 Global HQ | Mobile Command App</title>
+<title>S7 Global LLC | Get Found on Google & Apple Maps — $250 Flat</title>
 <style>
-:root { --bg: #060B14; --card: #0F172A; --border: #1E293B; --cyan: #00E5FF; --lime: #84CC16; --text: #F8FAFC; --muted: #94A3B8; }
+:root { --bg: #060B14; --card: #0F172A; --border: #1E293B; --cyan: #00E5FF; --lime: #84CC16; --text: #F8FAFC; --muted: #94A3B8; --danger:#F87171; }
 * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
 body { background: var(--bg); color: var(--text); padding-bottom: 84px; }
 header { background: var(--card); border-bottom: 1px solid var(--border); padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
 .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 17px; letter-spacing: 0.5px; }
 .badge { background: rgba(132, 204, 22, 0.15); color: var(--lime); border: 1px solid var(--lime); font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 999px; }
-.stats-bar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 12px 16px; background: #0B1221; border-bottom: 1px solid var(--border); }
-.stat-box { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 10px; text-align: center; }
-.stat-val { font-size: 18px; font-weight: 800; color: var(--cyan); }
-.stat-lbl { font-size: 11px; color: var(--muted); text-transform: uppercase; }
 .container { padding: 16px; max-width: 680px; margin: 0 auto; }
+.view { display: none; }
+.view.active { display: block; }
 .tab-view { display: none; }
 .tab-view.active { display: block; }
 .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px; margin-bottom: 14px; }
 .card h2 { font-size: 16px; font-weight: 700; color: var(--cyan); margin-bottom: 10px; }
 input, textarea, select { width: 100%; background: #060B14; border: 1px solid var(--border); color: var(--text); padding: 11px 12px; border-radius: 9px; font-size: 14px; margin-bottom: 10px; }
-.btn { width: 100%; padding: 12px; border: none; border-radius: 9px; font-weight: 700; font-size: 14px; cursor: pointer; margin-bottom: 8px; }
+label.fld { display:block; font-size:12px; color:var(--muted); margin-bottom:4px; text-transform:uppercase; letter-spacing:.4px; }
+.btn { display:block; width: 100%; padding: 12px; border: none; border-radius: 9px; font-weight: 700; font-size: 14px; cursor: pointer; margin-bottom: 8px; text-align:center; text-decoration:none; }
 .btn-cyan { background: var(--cyan); color: #060B14; }
 .btn-lime { background: var(--lime); color: #060B14; }
 .btn-outline { background: transparent; border: 1px solid var(--cyan); color: var(--cyan); }
-.client-item { background: #060B14; border: 1px solid var(--border); border-radius: 10px; padding: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-.status-pill { font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 999px; cursor: pointer; white-space: nowrap; }
+.btn-danger { background: transparent; border: 1px solid var(--danger); color: var(--danger); }
+.btn-small { width:auto; display:inline-block; padding:7px 12px; font-size:12px; margin:0 4px 4px 0; }
+.stats-bar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 12px 0; }
+.stat-box { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 10px; text-align: center; }
+.stat-val { font-size: 18px; font-weight: 800; color: var(--cyan); }
+.stat-lbl { font-size: 11px; color: var(--muted); text-transform: uppercase; }
+.client-item { background: #060B14; border: 1px solid var(--border); border-radius: 10px; padding: 12px; margin-bottom: 10px; }
+.status-pill { font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 999px; cursor: pointer; white-space: nowrap; display:inline-block; }
 .st-deposit { background: rgba(0,229,255,0.15); color: var(--cyan); border: 1px solid var(--cyan); }
+.st-setup { background: rgba(250,204,21,0.12); color: #FACC15; border: 1px solid #FACC15; }
 .st-live { background: rgba(132,204,22,0.15); color: var(--lime); border: 1px solid var(--lime); }
 pre { background: #060B14; border: 1px solid var(--border); padding: 12px; border-radius: 9px; font-size: 12px; color: #E2E8F0; white-space: pre-wrap; margin-bottom: 10px; max-height: 220px; overflow-y: auto; }
 nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); border-top: 1px solid var(--border); display: grid; grid-template-columns: repeat(4, 1fr); padding: 8px 4px; z-index: 50; }
 nav button { background: none; border: none; color: var(--muted); font-size: 11px; font-weight: 600; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; padding: 6px 0; }
 nav button.active { color: var(--cyan); }
+.hq-tabs { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:14px; }
+.hq-tabs button { background:var(--card); border:1px solid var(--border); color:var(--muted); border-radius:999px; padding:8px 13px; font-size:12px; font-weight:700; cursor:pointer; }
+.hq-tabs button.active { color:#060B14; background:var(--cyan); border-color:var(--cyan); }
+.hero { text-align:center; padding:26px 18px; }
+.hero h1 { font-size:26px; line-height:1.2; margin-bottom:10px; }
+.hero h1 span { color: var(--cyan); }
+.hero p { color: var(--muted); font-size:14px; line-height:1.55; margin-bottom:16px; }
+.plan-card { border:1px solid var(--border); border-radius:14px; padding:16px; margin-bottom:12px; background:#060B14; }
+.plan-card.featured { border-color: var(--lime); }
+.plan-price { font-size:30px; font-weight:900; color:var(--cyan); }
+.plan-card ul, .checklist { list-style:none; margin:10px 0; }
+.plan-card li, .checklist li { padding:5px 0; font-size:13.5px; color:#E2E8F0; }
+.plan-card li.no { color: var(--muted); }
+table.compare { width:100%; border-collapse:collapse; font-size:12.5px; }
+table.compare th, table.compare td { border:1px solid var(--border); padding:8px; text-align:left; }
+table.compare th { color: var(--cyan); background:#060B14; }
+.step-row { display:flex; gap:12px; margin-bottom:12px; }
+.step-num { flex:0 0 34px; height:34px; border-radius:50%; background:rgba(0,229,255,.15); border:1px solid var(--cyan); color:var(--cyan); font-weight:800; display:flex; align-items:center; justify-content:center; }
+details.faq { border:1px solid var(--border); border-radius:10px; padding:12px; margin-bottom:8px; background:#060B14; }
+details.faq summary { font-weight:700; font-size:14px; cursor:pointer; }
+details.faq p { color:var(--muted); font-size:13px; line-height:1.5; margin-top:8px; }
+#toast { position:fixed; left:50%; transform:translateX(-50%); bottom:96px; background:var(--lime); color:#060B14; font-weight:700; font-size:13px; padding:10px 18px; border-radius:999px; display:none; z-index:99; box-shadow:0 4px 18px rgba(0,0,0,.5); }
+.small { font-size:12.5px; color:var(--muted); line-height:1.5; }
 </style>
 </head>
 <body>
 <header>
   <div class="brand">
     <svg width="28" height="28" viewBox="0 0 60 60" fill="none"><rect x="2" y="2" width="56" height="56" rx="14" fill="#060B14" stroke="#00E5FF" stroke-width="3"/><text x="15" y="37" fill="#84CC16" font-family="sans-serif" font-weight="900" font-size="22">S7</text></svg>
-    S7 GLOBAL HQ
+    S7 GLOBAL LLC
   </div>
-  <span class="badge">$250 MAP + WEB</span>
+  <span class="badge">$250 MAPS SETUP</span>
 </header>
 
-<div class="stats-bar">
-  <div class="stat-box"><div class="stat-val" id="statCollected">$0</div><div class="stat-lbl">Collected</div></div>
-  <div class="stat-box"><div class="stat-val" id="statPending">$0</div><div class="stat-lbl">Pending</div></div>
-  <div class="stat-box"><div class="stat-val" id="statClients">0</div><div class="stat-lbl">Clients</div></div>
+<!-- ================= PUBLIC BUYER FRONT ================= -->
+<div id="view-home" class="view active">
+  <div class="container">
+    <div class="card hero">
+      <div style="font-size:34px;">📍</div>
+      <h1>Your shop, <span>found on the map.</span></h1>
+      <p>S7 Global LLC sets up and verifies your business on <strong style="color:var(--text);">Google Search, Google Maps &amp; Apple Maps</strong> — with photos, hours, services, and a starter website — so nearby customers find you instead of your competitors.</p>
+      <a class="btn btn-lime" href="#get-started" onclick="goSection('get-started');return false;">Get Started — $125 Down</a>
+      <a class="btn btn-outline" href="#plans" onclick="goSection('plans');return false;">See Plans &amp; Pricing</a>
+      <p class="small" style="margin:0;">Flat pricing. No monthly fee required. You keep 100% ownership of your listings — S7 Global is manager only.</p>
+    </div>
+
+    <div class="card">
+      <h2>How It Works</h2>
+      <div id="stepsList"></div>
+      <p class="small">Timelines depend on Google's verification process — we handle the setup and verification steps with you, and your balance is only due when your listing is live.</p>
+    </div>
+
+    <div class="card" id="plans">
+      <h2>Plans &amp; Pricing</h2>
+      <div id="planCards"></div>
+      <h2 style="margin-top:6px;">Compare Plans</h2>
+      <div id="compareWrap"></div>
+      <p class="small" style="margin-top:10px;">Refer a neighboring business and get a <strong style="color:var(--lime);">$25 credit</strong> when they sign up.</p>
+    </div>
+
+    <div class="card">
+      <h2>What's Included</h2>
+      <ul class="checklist" id="servicesList"></ul>
+    </div>
+
+    <div class="card">
+      <h2>Questions</h2>
+      <div id="faqList"></div>
+    </div>
+
+    <div class="card" id="get-started">
+      <h2>Get Started</h2>
+      <p class="small" style="margin-bottom:12px;">Tell us about your business. Submitting saves your request on this device — then tap <strong>Text</strong> or <strong>Email</strong> to send it to S7 Global so we can start.</p>
+      <label class="fld" for="leadBiz">Business Name *</label>
+      <input type="text" id="leadBiz" placeholder="e.g., East Point Cuts" />
+      <label class="fld" for="leadOwner">Your Name</label>
+      <input type="text" id="leadOwner" placeholder="Owner name" />
+      <label class="fld" for="leadPhone">Phone *</label>
+      <input type="tel" id="leadPhone" placeholder="e.g., 470-555-0199" />
+      <label class="fld" for="leadCity">City / Neighborhood</label>
+      <input type="text" id="leadCity" placeholder="e.g., East Point, GA" />
+      <label class="fld" for="leadPlan">Plan</label>
+      <select id="leadPlan"></select>
+      <label class="fld" for="leadMsg">Anything we should know? (optional)</label>
+      <textarea id="leadMsg" rows="2" placeholder="Current website, hours, questions..."></textarea>
+      <button class="btn btn-lime" onclick="submitLead()">Save My Request</button>
+      <div id="leadConfirm" style="display:none;"></div>
+    </div>
+
+    <div class="card">
+      <h2>Contact S7 Global LLC</h2>
+      <p style="font-size:14px;line-height:1.7;">
+        📱 <strong>470-494-5855 — TEXT ONLY — DO NOT CALL</strong><br/>
+        <span class="small">Text "MAPS" and we'll reply with next steps.</span><br/>
+        ✉️ <a href="mailto:marquezspencervip@gmail.com" style="color:var(--cyan);">marquezspencervip@gmail.com</a> <span class="small">(fastest response)</span><br/>
+        📸 Instagram DM: <strong>@s7globalhq</strong> — DM "MAPS"<br/>
+        <span class="small">S7 Global LLC • Marquez Spencer • Metro Atlanta / East Point, GA • Open 24 hours</span>
+      </p>
+      <a class="btn btn-cyan" href="sms:+14704945855?&amp;body=MAPS">Text MAPS to 470-494-5855 (Text Only)</a>
+      <a class="btn btn-outline" href="mailto:marquezspencervip@gmail.com?subject=MAPS%20Setup%20Request">Email for a Faster Response</a>
+    </div>
+    <p class="small" style="text-align:center;">Business owner? This page is the public S7 Global offer. S7 Global staff: use the Owner HQ tab below.</p>
+  </div>
 </div>
 
+<!-- ================= OWNER HQ ================= -->
+<div id="view-hq" class="view">
+  <div class="container">
+    <div class="card" style="text-align:center;padding:18px 16px;">
+      <canvas id="globeCanvas" width="300" height="190" style="width:100%;max-width:340px;height:auto;display:block;margin:0 auto;"></canvas>
+      <div style="font-weight:800;font-size:19px;letter-spacing:0.5px;margin-top:6px;">S7 GLOBAL <span style="color:var(--cyan);">HQ</span> — OWNER ONLY</div>
+      <div style="color:var(--muted);font-size:12px;">LOCAL SHOPS EVERYWHERE • LIVE LEAD TRACKING</div>
+      <div id="markerLine" style="color:var(--lime);font-size:12px;font-weight:700;margin-top:6px;">0 CLIENT MARKERS LIVE</div>
+    </div>
 
-<section style="padding:14px 16px 0;max-width:680px;margin:0 auto;">
-  <div class="card" style="text-align:center;padding:18px 16px;">
-    <canvas id="globeCanvas" width="300" height="190" style="width:100%;max-width:340px;height:auto;display:block;margin:0 auto;"></canvas>
-    <div style="font-weight:800;font-size:19px;letter-spacing:0.5px;margin-top:6px;">S7 GLOBAL <span style="color:var(--cyan);">HQ</span></div>
-    <div style="color:var(--muted);font-size:12px;">LOCAL SHOPS EVERYWHERE • LIVE LEAD TRACKING</div>
-    <div id="markerLine" style="color:var(--lime);font-size:12px;font-weight:700;margin-top:6px;">0 CLIENT MARKERS LIVE</div>
-  </div>
-  <div class="card">
-    <h2>🏆 $1,000 SPRINT LEADERBOARD</h2>
-    <div style="background:#060B14;border:1px solid var(--border);border-radius:999px;height:16px;overflow:hidden;margin-bottom:8px;">
-      <div id="sprintBar" style="height:100%;width:0%;background:linear-gradient(90deg,var(--cyan),var(--lime));transition:width 0.5s;"></div>
+    <div class="stats-bar">
+      <div class="stat-box"><div class="stat-val" id="statCollected">$0</div><div class="stat-lbl">Collected</div></div>
+      <div class="stat-box"><div class="stat-val" id="statPending">$0</div><div class="stat-lbl">Pending</div></div>
+      <div class="stat-box"><div class="stat-val" id="statClients">0</div><div class="stat-lbl">Clients</div></div>
     </div>
-    <div id="sprintText" style="font-size:13px;color:var(--muted);margin-bottom:10px;">$0 of $1,000 collected</div>
-    <div id="leaderList"><div style="color:var(--muted);font-size:13px;">No clients yet — your first $125 deposit puts you on the board.</div></div>
-  </div>
-</section>
-<div class="container">
-  <!-- TAB 1: CLIENT TRACKER -->
-  <div id="tab-clients" class="tab-view active">
-    <div class="card">
-      <h2>+ Add New Shop ($125 Deposit)</h2>
-      <input type="text" id="cName" placeholder="Business Name (e.g., Miami Cuts)" />
-      <input type="text" id="cPhone" placeholder="Owner Phone (e.g., 470-555-0199)" />
-      <input type="text" id="cCity" placeholder="Neighborhood / City (e.g., Miami, FL)" />
-      <button class="btn btn-cyan" onclick="addClient()">Add Client ($125 Paid)</button>
-    </div>
-    <div class="card">
-      <h2>Active Client Pipeline (Tap Status to Toggle)</h2>
-      <div id="clientList"></div>
-    </div>
-  </div>
 
-  <!-- TAB 2: SCRIPTS & RECEIPT -->
-  <div id="tab-scripts" class="tab-view">
     <div class="card">
-      <h2>1-Tap Pitch &amp; Receipt Generator</h2>
-      <input type="text" id="sBiz" placeholder="Target Business Name" oninput="updateTemplates()" />
-      <input type="text" id="sOwner" placeholder="Owner Name" oninput="updateTemplates()" />
-      <pre id="pitchBox"></pre>
-      <button class="btn btn-cyan" onclick="copyText('pitchBox')">Copy Cold Call / DM Pitch</button>
-      <pre id="receiptBox"></pre>
-      <button class="btn btn-lime" onclick="copyText('receiptBox')">Copy $125 Deposit Receipt</button>
+      <h2>🏆 $1,000 SPRINT LEADERBOARD</h2>
+      <div style="background:#060B14;border:1px solid var(--border);border-radius:999px;height:16px;overflow:hidden;margin-bottom:8px;">
+        <div id="sprintBar" style="height:100%;width:0%;background:linear-gradient(90deg,var(--cyan),var(--lime));transition:width 0.5s;"></div>
+      </div>
+      <div id="sprintText" style="font-size:13px;color:var(--muted);margin-bottom:10px;">$0 of $1,000 collected</div>
+      <div id="leaderList"></div>
     </div>
-  </div>
 
-  <!-- TAB 3: CLIENT WEBSITE BUILDER -->
-  <div id="tab-web" class="tab-view">
-    <div class="card">
-      <h2>Instant Client Landing Page Builder</h2>
-      <input type="text" id="wName" placeholder="Shop Name" />
-      <input type="text" id="wCity" placeholder="City / Neighborhood (e.g., Miami, FL)" />
-      <input type="text" id="wPhone" placeholder="Phone Number" />
-      <input type="text" id="wAddr" placeholder="Street Address" />
-      <input type="text" id="wHours" placeholder="Hours (e.g., Mon-Sat 9am-7pm)" />
-      <input type="text" id="wServices" placeholder="Top 3 Services (comma separated)" />
-      <button class="btn btn-cyan" onclick="buildSite()">Generate Client index.html</button>
-      <pre id="siteOutput">Fill details above and tap Generate...</pre>
-      <button class="btn btn-lime" onclick="copyText('siteOutput')">Copy Client HTML for Vercel</button>
+    <div class="hq-tabs">
+      <button id="hqtab-clients" class="active" onclick="hqTab('clients')">Clients</button>
+      <button id="hqtab-leads" onclick="hqTab('leads')">Leads</button>
+      <button id="hqtab-scripts" onclick="hqTab('scripts')">Scripts</button>
+      <button id="hqtab-web" onclick="hqTab('web')">Web Builder</button>
+      <button id="hqtab-muse" onclick="hqTab('muse')">Muse AI</button>
+      <button id="hqtab-data" onclick="hqTab('data')">Data</button>
     </div>
-  </div>
 
-  <!-- TAB 4: META MUSE PROMPTS -->
-  <div id="tab-muse" class="tab-view">
-    <div class="card">
-      <h2>Meta Muse Business Brain Prompt</h2>
-      <pre id="museBrain">Save these rules for S7 Global LLC (Marquez Spencer — S7 Global serves local shops everywhere):
-• Offer: Flat $250 Local Visibility Package (Google Search, Google Maps, Apple Maps verification + starter website).
-• Terms: 50/50 split — $125 upfront deposit to start, $125 due ONLY when live on the map.
-• Contact: DM "MAPS" on Instagram @s7globalhq | MarquezSpencervip@gmail.com.
+    <!-- HQ: CLIENTS -->
+    <div id="tab-clients" class="tab-view active">
+      <div class="card">
+        <h2 id="clientFormTitle">+ Add New Client</h2>
+        <label class="fld" for="cName">Business Name *</label>
+        <input type="text" id="cName" placeholder="Business Name (e.g., East Point Cuts)" />
+        <label class="fld" for="cOwner">Owner Name</label>
+        <input type="text" id="cOwner" placeholder="Owner name" />
+        <label class="fld" for="cEmail">Owner Email</label>
+        <input type="email" id="cEmail" placeholder="owner@example.com" />
+        <label class="fld" for="cPhone">Owner Phone</label>
+        <input type="tel" id="cPhone" placeholder="e.g., 470-555-0199" />
+        <label class="fld" for="cCity">Neighborhood / City</label>
+        <input type="text" id="cCity" placeholder="e.g., East Point, GA" />
+        <label class="fld" for="cPlan">Plan</label>
+        <select id="cPlan"></select>
+        <label class="fld" for="cStage">Stage</label>
+        <select id="cStage">
+          <option value="deposit">Step 1 — Claimed / Deposit In</option>
+          <option value="setup">Step 2 — In Setup / Verification</option>
+          <option value="live">Step 3 — Live</option>
+        </select>
+        <button class="btn btn-cyan" id="clientSaveBtn" onclick="addClient()">Add Client</button>
+        <button class="btn btn-outline" id="clientCancelBtn" style="display:none;" onclick="cancelEdit()">Cancel Edit</button>
+      </div>
+      <div class="card">
+        <h2>Client Pipeline (tap stage pill to advance)</h2>
+        <div id="clientList"></div>
+      </div>
+    </div>
+
+    <!-- HQ: LEADS -->
+    <div id="tab-leads" class="tab-view">
+      <div class="card">
+        <h2>Public Intake Leads (this device)</h2>
+        <p class="small" style="margin-bottom:10px;">Leads saved from the public Get Started form on this device. Convert a lead to a client when the deposit lands.</p>
+        <div id="leadsList"></div>
+      </div>
+    </div>
+
+    <!-- HQ: SCRIPTS -->
+    <div id="tab-scripts" class="tab-view">
+      <div class="card">
+        <h2>1-Tap Pitch &amp; Receipt Generator</h2>
+        <input type="text" id="sBiz" placeholder="Target Business Name" oninput="updateTemplates()" />
+        <input type="text" id="sOwner" placeholder="Owner Name" oninput="updateTemplates()" />
+        <label class="fld" for="sPlan">Plan</label>
+        <select id="sPlan" onchange="updateTemplates()"></select>
+        <pre id="pitchBox"></pre>
+        <button class="btn btn-cyan" onclick="copyText('pitchBox')">Copy Cold Call / DM Pitch</button>
+        <pre id="receiptBox"></pre>
+        <button class="btn btn-lime" onclick="copyText('receiptBox')">Copy Receipt</button>
+      </div>
+    </div>
+
+    <!-- HQ: WEB BUILDER -->
+    <div id="tab-web" class="tab-view">
+      <div class="card">
+        <h2>Instant Client Landing Page Builder</h2>
+        <input type="text" id="wName" placeholder="Shop Name" />
+        <input type="text" id="wCity" placeholder="City / Neighborhood (e.g., East Point, GA)" />
+        <input type="text" id="wPhone" placeholder="Phone Number" />
+        <input type="text" id="wAddr" placeholder="Street Address" />
+        <input type="text" id="wHours" placeholder="Hours (e.g., Mon-Sat 9am-7pm)" />
+        <input type="text" id="wServices" placeholder="Top 3 Services (comma separated)" />
+        <button class="btn btn-cyan" onclick="buildSite()">Generate Client index.html</button>
+        <pre id="siteOutput">Fill details above and tap Generate...</pre>
+        <button class="btn btn-lime" onclick="copyText('siteOutput')">Copy Client HTML</button>
+      </div>
+    </div>
+
+    <!-- HQ: MUSE -->
+    <div id="tab-muse" class="tab-view">
+      <div class="card">
+        <h2>Meta Muse Business Brain Prompt</h2>
+        <pre id="museBrain">Save these rules for S7 Global LLC (Marquez Spencer — Metro Atlanta / East Point, GA):
+• Offer: Full Setup $250 flat — Google Business Profile setup + verification help, Google Maps + Apple Maps, photos/hours/services, starter website, review QR code. $125 down, $125 ONLY when live. Basic Listing $150, due when live (Google listing only — no Apple Maps, no starter website). $25 referral credit.
+• Ownership: Client keeps 100% ownership; S7 Global is manager only.
+• Contact: 470-494-5855 TEXT ONLY — DO NOT CALL | marquezspencervip@gmail.com (faster response) | DM "MAPS" on Instagram @s7globalhq.
+• Honesty: No guaranteed rankings or guaranteed verification — timelines depend on Google.
 • Rule: Never send messages without my approval first.</pre>
-      <button class="btn btn-cyan" onclick="copyText('museBrain')">Copy Business Brain Prompt</button>
+        <button class="btn btn-cyan" onclick="copyText('museBrain')">Copy Business Brain Prompt</button>
+      </div>
+      <div class="card">
+        <h2>Meta Muse 25-Lead Scraper Prompt</h2>
+        <pre id="museScrape">Search local directories, Instagram, and Facebook for 25 active local businesses in East Point, College Park, and Southwest Atlanta (barbershops, salons, auto repair, detailers, HVAC, restaurants) that lack a verified Google Business Profile or website. Output Business Name, Neighborhood, Phone, and Social Handle in a table.</pre>
+        <button class="btn btn-lime" onclick="copyText('museScrape')">Copy Lead Scraper Prompt</button>
+      </div>
     </div>
-    <div class="card">
-      <h2>Meta Muse 25-Lead Scraper Prompt</h2>
-      <pre id="museScrape">Search local directories, Instagram, and Facebook for 25 active local businesses in any target city (barbershops, salons, auto repair, detailers, HVAC, restaurants) that lack a verified Google Business Profile or website. Output Business Name, Neighborhood, Phone, and Social Handle in a table.</pre>
-      <button class="btn btn-lime" onclick="copyText('museScrape')">Copy Lead Scraper Prompt</button>
+
+    <!-- HQ: DATA -->
+    <div id="tab-data" class="tab-view">
+      <div class="card">
+        <h2>Database — Export &amp; Backup</h2>
+        <p class="small" style="margin-bottom:10px;">Two local stores on this device: <strong>s7_clients</strong> (HQ pipeline) and <strong>s7_leads</strong> (public intake). Export regularly — localStorage is per-device. Optional Firebase sync is built in but DISABLED (no config set); the app works fully without it.</p>
+        <button class="btn btn-cyan" onclick="exportData('clients','json')">Export Clients (JSON)</button>
+        <button class="btn btn-cyan" onclick="exportData('clients','csv')">Export Clients (CSV)</button>
+        <button class="btn btn-lime" onclick="exportData('leads','json')">Export Leads (JSON)</button>
+        <button class="btn btn-lime" onclick="exportData('leads','csv')">Export Leads (CSV)</button>
+      </div>
     </div>
   </div>
 </div>
+
+<div id="toast"></div>
 
 <nav>
-  <button class="active" onclick="switchTab('clients', this)">Clients</button>
-  <button onclick="switchTab('scripts', this)">Scripts</button>
-  <button onclick="switchTab('web', this)">Web Builder</button>
-  <button onclick="switchTab('muse', this)">Muse AI</button>
+  <button id="nav-home" class="active" onclick="showView('home', this)">🏠 Home</button>
+  <button id="nav-plans" onclick="navPlans(this)">💲 Plans</button>
+  <button id="nav-start" onclick="navStart(this)">🚀 Get Started</button>
+  <button id="nav-hq" onclick="showView('hq', this)">🔐 Owner HQ</button>
 </nav>
 
 <script>
-let clients = JSON.parse(localStorage.getItem('s7_clients') || '[]');
+/* ============================================================
+   S7 GLOBAL HQ — V3
+   1) CATALOG: single source of truth for plans/services/steps/FAQs.
+      All buyer-facing pricing, checklists, comparisons and steps
+      are RENDERED from this object — never hard-code prices in HTML.
+   2) DATABASE: two localStorage stores (s7_clients = HQ pipeline,
+      s7_leads = public intake). Optional Firebase sync stub below
+      is DISABLED — the app works fully without it.
+   ============================================================ */
+const CATALOG = {
+  business: {
+    name: 'S7 Global LLC',
+    owner: 'Marquez Spencer',
+    area: 'Metro Atlanta / East Point, GA',
+    phoneDisplay: '470-494-5855',
+    phoneLabel: 'TEXT ONLY — DO NOT CALL',
+    phoneSms: '+14704945855',
+    email: 'marquezspencervip@gmail.com',
+    instagram: '@s7globalhq',
+    hours: 'Open 24 hours'
+  },
+  plans: [
+    {
+      id: 'full', name: 'Full Setup', featured: true,
+      price: 250, deposit: 125, balance: 125, balanceWhen: 'only when live',
+      tagline: 'Everything you need to get found — Google + Apple + your starter website.',
+      includes: [
+        'Google Business Profile setup + verification help',
+        'Google Maps listing',
+        'Apple Maps listing',
+        'Photos, hours & services setup',
+        'Starter website',
+        'Review QR code',
+        'You keep 100% ownership — S7 Global is manager only'
+      ]
+    },
+    {
+      id: 'basic', name: 'Basic Listing', featured: false,
+      price: 150, deposit: 0, balance: 150, balanceWhen: 'due when live',
+      tagline: 'Just the Google listing, done right. Nothing due until you are live.',
+      includes: [
+        'Google Business Profile setup + verification help',
+        'Google Maps listing',
+        'Photos, hours & services setup',
+        'Review QR code',
+        'You keep 100% ownership — S7 Global is manager only'
+      ]
+    }
+  ],
+  compareRows: [
+    { label: 'Price', full: '$250 flat', basic: '$150 flat' },
+    { label: 'Due to start', full: '$125 down', basic: '$0 — due when live' },
+    { label: 'Balance', full: '$125 only when live', basic: '$150 when live' },
+    { label: 'Google Business Profile + Maps', full: '✓', basic: '✓' },
+    { label: 'Apple Maps', full: '✓', basic: '—' },
+    { label: 'Photos / hours / services setup', full: '✓', basic: '✓' },
+    { label: 'Starter website', full: '✓', basic: '—' },
+    { label: 'Review QR code', full: '✓', basic: '✓' },
+    { label: 'You keep 100% ownership', full: '✓', basic: '✓' }
+  ],
+  services: [
+    'Google Business Profile setup + verification help',
+    'Google Maps + Apple Maps listings (Full Setup)',
+    'Photos, hours & services set up for you',
+    'Starter website (Full Setup)',
+    'Review QR code for your counter',
+    'Honest timelines — verification depends on Google, balance due only when live'
+  ],
+  steps: [
+    { n: 1, title: 'Step 1 — Claimed / Deposit In', text: 'Pick your plan and start: $125 down on Full Setup, $0 down on Basic Listing. We collect your business info, photos and hours.' },
+    { n: 2, title: 'Step 2 — In Setup / Verification', text: 'We build your listings and work through Google verification with you, then set up Apple Maps and your starter website (Full Setup).' },
+    { n: 3, title: 'Step 3 — Live', text: 'Your business shows on the map. Only now is your balance due — $125 on Full Setup, $150 on Basic Listing. You get your review QR code and full ownership.' }
+  ],
+  faqs: [
+    { q: 'How much is it, total?', a: 'Full Setup is $250 flat: $125 down to start and $125 only when your listing is live. Basic Listing is $150, due when live — nothing upfront. No required monthly fee.' },
+    { q: 'Do I keep ownership of my listing?', a: 'Yes — 100%. Your Google and Apple listings are created under your ownership. S7 Global is added as manager only to do the setup work.' },
+    { q: 'How long does verification take?', a: 'It depends on Google — verification can take a few days and Google controls the timeline. We handle the setup and verification steps with you, and your balance is not due until you are live.' },
+    { q: 'What do you need from me?', a: 'Your business name, address, hours, phone, and a few good photos. We handle the rest and tell you exactly when a verification step needs you.' },
+    { q: 'What if my business is not in Atlanta?', a: 'We are based in Metro Atlanta / East Point, GA and set up local shops everywhere — the whole process works by text and email.' },
+    { q: 'How do I reach you?', a: 'Text 470-494-5855 (TEXT ONLY — do not call) or email marquezspencervip@gmail.com for a faster response. You can also DM "MAPS" to @s7globalhq on Instagram.' }
+  ],
+  referral: '$25 credit when a business you refer signs up.'
+};
 
-function switchTab(id, el) {
-  document.querySelectorAll('.tab-view').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
-  document.getElementById('tab-' + id).classList.add('active');
-  el.classList.add('active');
+/* OPTIONAL Firebase sync — DISABLED.
+   To enable later, paste YOUR OWN Firebase web config here and
+   wire sync functions to it. No keys are bundled with this app,
+   no network sync is attempted, and everything works without it. */
+const FIREBASE_CONFIG = { apiKey: '', authDomain: '', projectId: '', appId: '' };
+const firebaseEnabled = Boolean(FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.projectId);
+
+/* ---------- helpers ---------- */
+function esc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, function(ch) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch];
+  });
 }
+function loadStore(key) {
+  try { const v = JSON.parse(localStorage.getItem(key) || '[]'); return Array.isArray(v) ? v : []; }
+  catch (e) { return []; }
+}
+function saveStore(key, arr) { try { localStorage.setItem(key, JSON.stringify(arr)); } catch (e) {} }
+function planOf(id) { return CATALOG.plans.find(function(p) { return p.id === id; }) || CATALOG.plans[0]; }
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.innerText = msg; t.style.display = 'block';
+  setTimeout(function() { t.style.display = 'none'; }, 2200);
+}
+function copyText(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const text = el.innerText;
+  function done() { toast('Copied to clipboard'); }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(done).catch(function() { legacyCopy(text); done(); });
+  } else { legacyCopy(text); done(); }
+}
+function legacyCopy(text) {
+  const ta = document.createElement('textarea');
+  ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+  document.body.appendChild(ta); ta.select();
+  try { document.execCommand('copy'); } catch (e) {}
+  document.body.removeChild(ta);
+}
+function download(filename, text, mime) {
+  const blob = new Blob([text], { type: mime || 'text/plain' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = filename;
+  document.body.appendChild(a); a.click();
+  setTimeout(function() { URL.revokeObjectURL(a.href); a.remove(); }, 400);
+}
+
+/* ---------- navigation ---------- */
+function showView(view, el) {
+  document.querySelectorAll('.view').forEach(function(v) { v.classList.remove('active'); });
+  document.querySelectorAll('nav button').forEach(function(b) { b.classList.remove('active'); });
+  document.getElementById('view-' + view).classList.add('active');
+  if (el) el.classList.add('active');
+  window.scrollTo(0, 0);
+}
+function goSection(id) {
+  showView('home', document.getElementById('nav-home'));
+  const t = document.getElementById(id);
+  if (t && t.scrollIntoView) setTimeout(function() { t.scrollIntoView({ behavior: 'smooth' }); }, 60);
+}
+function navPlans(el) { goSection('plans'); document.querySelectorAll('nav button').forEach(function(b){b.classList.remove('active');}); el.classList.add('active'); }
+function navStart(el) { goSection('get-started'); document.querySelectorAll('nav button').forEach(function(b){b.classList.remove('active');}); el.classList.add('active'); }
+function hqTab(id) {
+  document.querySelectorAll('#view-hq .tab-view').forEach(function(t) { t.classList.remove('active'); });
+  document.querySelectorAll('.hq-tabs button').forEach(function(b) { b.classList.remove('active'); });
+  document.getElementById('tab-' + id).classList.add('active');
+  document.getElementById('hqtab-' + id).classList.add('active');
+}
+
+/* ---------- catalog rendering (buyer front) ---------- */
+function planOptions(selected) {
+  return CATALOG.plans.map(function(p) {
+    return '<option value="' + p.id + '"' + (p.id === selected ? ' selected' : '') + '>' +
+      esc(p.name) + ' — $' + p.price + (p.deposit ? ' ($' + p.deposit + ' down, $' + p.balance + ' when live)' : ' (due when live)') + '</option>';
+  }).join('');
+}
+function renderCatalog() {
+  document.getElementById('stepsList').innerHTML = CATALOG.steps.map(function(s) {
+    return '<div class="step-row"><div class="step-num">' + s.n + '</div><div><div style="font-weight:700;font-size:14px;">' + esc(s.title) + '</div><div class="small">' + esc(s.text) + '</div></div></div>';
+  }).join('');
+  document.getElementById('planCards').innerHTML = CATALOG.plans.map(function(p) {
+    const lis = p.includes.map(function(i) { return '<li>✅ ' + esc(i) + '</li>'; }).join('');
+    const excluded = CATALOG.plans[0].includes.filter(function(i) {
+      return p.includes.indexOf(i) === -1 && i.indexOf('ownership') === -1;
+    }).map(function(i) { return '<li class="no">— ' + esc(i.replace(' (Full Setup)', '')) + '</li>'; }).join('');
+    return '<div class="plan-card' + (p.featured ? ' featured' : '') + '">' +
+      (p.featured ? '<div style="color:var(--lime);font-size:11px;font-weight:800;letter-spacing:.6px;">MOST POPULAR</div>' : '') +
+      '<div style="font-weight:800;font-size:17px;">' + esc(p.name) + '</div>' +
+      '<div class="plan-price">$' + p.price + ' <span style="font-size:13px;color:var(--muted);font-weight:600;">flat</span></div>' +
+      '<div class="small">' + (p.deposit ? '$' + p.deposit + ' down • $' + p.balance + ' ' + esc(p.balanceWhen) : '$0 down • $' + p.balance + ' ' + esc(p.balanceWhen)) + '</div>' +
+      '<p class="small" style="margin-top:6px;">' + esc(p.tagline) + '</p><ul>' + lis + excluded + '</ul>' +
+      '<button class="btn ' + (p.featured ? 'btn-lime' : 'btn-cyan') + '" onclick="choosePlan(\'' + p.id + '\')">Choose ' + esc(p.name) + '</button></div>';
+  }).join('');
+  document.getElementById('compareWrap').innerHTML = '<table class="compare"><tr><th></th>' +
+    CATALOG.plans.map(function(p) { return '<th>' + esc(p.name) + '</th>'; }).join('') + '</tr>' +
+    CATALOG.compareRows.map(function(r) {
+      return '<tr><td style="color:var(--muted);">' + esc(r.label) + '</td><td>' + esc(r.full) + '</td><td>' + esc(r.basic) + '</td></tr>';
+    }).join('') + '</table>';
+  document.getElementById('servicesList').innerHTML = CATALOG.services.map(function(s) { return '<li>✅ ' + esc(s) + '</li>'; }).join('');
+  document.getElementById('faqList').innerHTML = CATALOG.faqs.map(function(f) {
+    return '<details class="faq"><summary>' + esc(f.q) + '</summary><p>' + esc(f.a) + '</p></details>';
+  }).join('');
+  document.getElementById('leadPlan').innerHTML = planOptions('full');
+  document.getElementById('cPlan').innerHTML = planOptions('full');
+  document.getElementById('sPlan').innerHTML = planOptions('full');
+}
+function choosePlan(id) {
+  document.getElementById('leadPlan').value = id;
+  goSection('get-started');
+  toast(planOf(id).name + ' selected');
+}
+
+/* ---------- leads DB (public intake) ---------- */
+let leads = loadStore('s7_leads');
+function submitLead() {
+  const biz = document.getElementById('leadBiz').value.trim();
+  const owner = document.getElementById('leadOwner').value.trim();
+  const phone = document.getElementById('leadPhone').value.trim();
+  const city = document.getElementById('leadCity').value.trim();
+  const plan = document.getElementById('leadPlan').value;
+  const msg = document.getElementById('leadMsg').value.trim();
+  if (!biz) { toast('Enter your business name'); return; }
+  if (!phone) { toast('Enter a phone number so we can text you back'); return; }
+  const lead = { id: Date.now(), biz: biz, owner: owner, phone: phone, city: city, plan: plan, msg: msg, status: 'new', createdAt: new Date().toISOString() };
+  leads.unshift(lead); saveStore('s7_leads', leads); renderLeads();
+  const p = planOf(plan);
+  const body = 'MAPS — New request: ' + biz + (owner ? ' (' + owner + ')' : '') + ', ' + (city || 'Metro Atlanta') + ', Phone: ' + phone + ', Plan: ' + p.name + ' $' + p.price + (msg ? ', Note: ' + msg : '');
+  const box = document.getElementById('leadConfirm');
+  box.style.display = 'block';
+  box.innerHTML = '<div style="background:rgba(132,204,22,.12);border:1px solid var(--lime);border-radius:10px;padding:12px;margin-top:6px;">' +
+    '<div style="font-weight:800;color:var(--lime);margin-bottom:6px;">✅ Request saved on this device</div>' +
+    '<p class="small" style="margin-bottom:10px;">Last step — send it to S7 Global so we actually receive it:</p>' +
+    '<a class="btn btn-lime" href="sms:' + CATALOG.business.phoneSms + '?&amp;body=' + encodeURIComponent(body) + '">Text It — 470-494-5855 (Text Only)</a>' +
+    '<a class="btn btn-outline" href="mailto:' + CATALOG.business.email + '?subject=' + encodeURIComponent('MAPS Setup Request — ' + biz) + '&amp;body=' + encodeURIComponent(body) + '">Email It — Faster Response</a></div>';
+  toast('Request saved');
+  if (box.scrollIntoView) box.scrollIntoView({ behavior: 'smooth' });
+}
+function renderLeads() {
+  const list = document.getElementById('leadsList');
+  if (!leads.length) { list.innerHTML = '<p class="small">No leads saved on this device yet.</p>'; return; }
+  list.innerHTML = leads.map(function(l) {
+    const p = planOf(l.plan);
+    return '<div class="client-item"><div style="font-weight:700;font-size:14px;">' + esc(l.biz) + '</div>' +
+      '<div style="font-size:12px;color:var(--muted);">' + esc(l.owner || 'Owner n/a') + ' • ' + esc(l.city || 'City n/a') + ' • ' + esc(l.phone) + '</div>' +
+      '<div style="font-size:12px;color:var(--muted);">' + esc(p.name) + ' $' + p.price + ' • ' + esc((l.createdAt || '').slice(0, 10)) + (l.msg ? ' • ' + esc(l.msg) : '') + '</div>' +
+      '<div style="margin-top:8px;"><button class="btn btn-lime btn-small" onclick="leadToClient(' + l.id + ')">Convert to Client</button>' +
+      '<button class="btn btn-danger btn-small" onclick="deleteLead(' + l.id + ')">Delete</button></div></div>';
+  }).join('');
+}
+function deleteLead(id) {
+  if (!confirm('Delete this lead?')) return;
+  leads = leads.filter(function(l) { return l.id !== id; });
+  saveStore('s7_leads', leads); renderLeads(); toast('Lead deleted');
+}
+function leadToClient(id) {
+  const l = leads.find(function(x) { return x.id === id; });
+  if (!l) return;
+  clients.unshift({ id: Date.now(), name: l.biz, owner: l.owner || '', email: '', phone: l.phone || '', city: l.city || 'Atlanta, GA', plan: l.plan || 'full', stage: 'deposit', createdAt: new Date().toISOString() });
+  leads = leads.filter(function(x) { return x.id !== id; });
+  saveStore('s7_leads', leads); saveRender(); renderLeads();
+  hqTab('clients'); toast('Lead converted to client');
+}
+
+/* ---------- clients DB (HQ pipeline, key s7_clients — legacy compatible) ---------- */
+function normalizeClient(c) {
+  const stage = c.stage || (c.status === 'live' ? 'live' : 'deposit');
+  return {
+    id: c.id || Date.now(), name: c.name || 'Unnamed', owner: c.owner || '', email: c.email || '',
+    phone: c.phone || '', city: c.city || 'Atlanta, GA', plan: c.plan || 'full',
+    stage: ['deposit', 'setup', 'live'].indexOf(stage) >= 0 ? stage : 'deposit',
+    createdAt: c.createdAt || ''
+  };
+}
+let clients = loadStore('s7_clients').map(normalizeClient);
+let editingId = null;
+const STAGES = ['deposit', 'setup', 'live'];
+const STAGE_LABEL = { deposit: 'Step 1 — Deposit', setup: 'Step 2 — In Setup', live: 'Step 3 — LIVE' };
+function collectedOf(c) { const p = planOf(c.plan); return c.stage === 'live' ? p.price : p.deposit; }
+function pendingOf(c) { const p = planOf(c.plan); return p.price - collectedOf(c); }
 
 function addClient() {
   const name = document.getElementById('cName').value.trim();
+  const owner = document.getElementById('cOwner').value.trim();
+  const email = document.getElementById('cEmail').value.trim();
   const phone = document.getElementById('cPhone').value.trim();
-  const city = document.getElementById('cCity').value.trim() || 'Your City';
-  if (!name) return alert('Enter a business name');
-  clients.unshift({ id: Date.now(), name, phone, city, status: 'deposit' });
-  saveRender();
-  document.getElementById('cName').value = '';
-  document.getElementById('cPhone').value = '';
-  document.getElementById('cCity').value = '';
+  const city = document.getElementById('cCity').value.trim() || 'Atlanta, GA';
+  const plan = document.getElementById('cPlan').value;
+  const stage = document.getElementById('cStage').value;
+  if (!name) { toast('Enter a business name'); return; }
+  if (email && email.indexOf('@') < 1) { toast('That email looks incomplete'); return; }
+  if (editingId) {
+    clients = clients.map(function(c) {
+      return c.id === editingId ? Object.assign({}, c, { name: name, owner: owner, email: email, phone: phone, city: city, plan: plan, stage: stage }) : c;
+    });
+    toast('Client updated');
+  } else {
+    clients.unshift({ id: Date.now(), name: name, owner: owner, email: email, phone: phone, city: city, plan: plan, stage: stage, createdAt: new Date().toISOString() });
+    toast('Client added');
+  }
+  cancelEdit(); saveRender();
 }
-
-function toggleStatus(id) {
-  clients = clients.map(c => c.id === id ? { ...c, status: c.status === 'deposit' ? 'live' : 'deposit' } : c);
+function editClient(id) {
+  const c = clients.find(function(x) { return x.id === id; });
+  if (!c) return;
+  editingId = id;
+  document.getElementById('cName').value = c.name;
+  document.getElementById('cOwner').value = c.owner;
+  document.getElementById('cEmail').value = c.email;
+  document.getElementById('cPhone').value = c.phone;
+  document.getElementById('cCity').value = c.city;
+  document.getElementById('cPlan').value = c.plan;
+  document.getElementById('cStage').value = c.stage;
+  document.getElementById('clientFormTitle').innerText = '✏️ Edit Client';
+  document.getElementById('clientSaveBtn').innerText = 'Save Changes';
+  document.getElementById('clientCancelBtn').style.display = 'block';
+  window.scrollTo(0, 0);
+}
+function cancelEdit() {
+  editingId = null;
+  ['cName', 'cOwner', 'cEmail', 'cPhone', 'cCity'].forEach(function(i) { document.getElementById(i).value = ''; });
+  document.getElementById('clientFormTitle').innerText = '+ Add New Client';
+  document.getElementById('clientSaveBtn').innerText = 'Add Client';
+  document.getElementById('clientCancelBtn').style.display = 'none';
+}
+function deleteClient(id) {
+  if (!confirm('Delete this client? This cannot be undone.')) return;
+  clients = clients.filter(function(c) { return c.id !== id; });
+  if (editingId === id) cancelEdit();
+  saveRender(); toast('Client deleted');
+}
+function cycleStage(id) {
+  clients = clients.map(function(c) {
+    if (c.id !== id) return c;
+    const next = STAGES[(STAGES.indexOf(c.stage) + 1) % STAGES.length];
+    return Object.assign({}, c, { stage: next });
+  });
   saveRender();
 }
-
 function saveRender() {
-  localStorage.setItem('s7_clients', JSON.stringify(clients));
+  saveStore('s7_clients', clients);
   const list = document.getElementById('clientList');
   let collected = 0, pending = 0;
-  list.innerHTML = clients.length ? '' : '<p style="color:#94A3B8;font-size:13px;">No clients added yet. Close your first $125 deposit today!</p>';
-  clients.forEach(c => {
-    if (c.status === 'deposit') { collected += 125; pending += 125; }
-    else { collected += 250; }
-    list.innerHTML += `
-      <div class="client-item">
-        <div>
-          <div style="font-weight:700;font-size:14px;">${c.name}</div>
-          <div style="font-size:12px;color:#94A3B8;">${c.city} • ${c.phone || 'No phone'}</div>
-        </div>
-        <span class="status-pill ${c.status === 'deposit' ? 'st-deposit' : 'st-live'}" onclick="toggleStatus(${c.id})">${c.status === 'deposit' ? '$125 Paid (1/2)' : '$250 LIVE (2/2)'}</span>
-      </div>`;
-  });
+  if (!clients.length) {
+    list.innerHTML = '<p class="small">No clients yet. Add your first client above, or convert a lead.</p>';
+  } else {
+    list.innerHTML = clients.map(function(c) {
+      const p = planOf(c.plan);
+      return '<div class="client-item"><div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start;">' +
+        '<div><div style="font-weight:700;font-size:14px;">' + esc(c.name) + '</div>' +
+        '<div style="font-size:12px;color:var(--muted);">' + esc(c.city) + ' • ' + esc(c.phone || 'No phone') + (c.owner ? ' • ' + esc(c.owner) : '') + (c.email ? ' • ' + esc(c.email) : '') + '</div>' +
+        '<div style="font-size:12px;color:var(--muted);">' + esc(p.name) + ' $' + p.price + ' — collected $' + collectedOf(c) + ', pending $' + pendingOf(c) + '</div></div>' +
+        '<span class="status-pill st-' + c.stage + '" onclick="cycleStage(' + c.id + ')">' + STAGE_LABEL[c.stage] + '</span></div>' +
+        '<div style="margin-top:8px;"><button class="btn btn-outline btn-small" onclick="editClient(' + c.id + ')">Edit</button>' +
+        '<button class="btn btn-danger btn-small" onclick="deleteClient(' + c.id + ')">Delete</button></div></div>';
+    }).join('');
+    // recompute totals cleanly (map above already added per item)
+    collected = clients.reduce(function(a, c) { return a + collectedOf(c); }, 0);
+    pending = clients.reduce(function(a, c) { return a + pendingOf(c); }, 0);
+  }
   document.getElementById('statCollected').innerText = '$' + collected;
   document.getElementById('statPending').innerText = '$' + pending;
   document.getElementById('statClients').innerText = clients.length;
+  renderSprint();
 }
-
-function updateTemplates() {
-  const biz = document.getElementById('sBiz').value.trim() || '[Business Name]';
-  const owner = document.getElementById('sOwner').value.trim() || 'there';
-  document.getElementById('pitchBox').innerText = `Hey ${owner}, this is Marquez with S7 Global. I noticed ${biz} isn't fully verified on Google Maps & Apple Maps yet, which sends nearby searches straight to competitors. I get local shops live on Google Search, Google Maps & Apple Maps (plus a starter website) for a flat $250—just $125 down today to start, and the final $125 only when you're live on the map. Want me to text over the quick details?`;
-  document.getElementById('receiptBox').innerText = `S7 GLOBAL LLC — DEPOSIT RECEIPT & AGREEMENT\nClient: ${biz} (${owner})\nProvider: S7 Global LLC (Marquez Spencer | marquezspencervip@gmail.com)\nPackage: Google Maps + Apple Maps Verification + Starter Web Setup ($250.00 Flat)\nDeposit Paid Today: $125.00 [RECEIVED]\nBalance Due Upon Live Map Verification: $125.00\nThank you for choosing S7 Global LLC!`;
-}
-
-function buildSite() {
-  const name = document.getElementById('wName').value.trim() || 'Local Shop ATL';
-  const city = document.getElementById('wCity').value.trim() || 'Your City';
-  const phone = document.getElementById('wPhone').value.trim() || '(470) 555-0100';
-  const cleanPhone = phone.replace(/\D/g, '');
-  const addr = document.getElementById('wAddr').value.trim() || 'Your City';
-  const hours = document.getElementById('wHours').value.trim() || 'Mon–Sat: 9:00 AM – 7:00 PM';
-  const svcs = (document.getElementById('wServices').value.trim() || 'Walk-Ins, Appointments, Local Service').split(',').map(s => `<li style="padding:8px 0;border-bottom:1px solid #eee;"><strong>${s.trim()}</strong></li>`).join('');
-  document.getElementById('siteOutput').innerText = `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${name} | ${city}</title></head><body style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:16px;background:#f8fafc;color:#0f172a;"><div style="background:#060B14;color:#fff;padding:28px 20px;border-radius:14px;text-align:center;"><div style="color:#00E5FF;font-size:12px;font-weight:700;text-transform:uppercase;">Serving ${city}</div><h1 style="margin:8px 0;">${name}</h1><a href="tel:${cleanPhone}" style="display:block;background:#00E5FF;color:#060B14;padding:14px;border-radius:10px;text-decoration:none;font-weight:800;margin-top:14px;">Call Now: ${phone}</a></div><div style="background:#fff;padding:18px;border-radius:12px;margin-top:14px;"><h2>Our Services</h2><ul style="list-style:none;padding:0;">${svcs}</ul></div><div style="background:#fff;padding:18px;border-radius:12px;margin-top:14px;"><h2>Location & Hours</h2><p><strong>Address:</strong> ${addr}</p><p><strong>Hours:</strong> ${hours}</p></div><footer style="text-align:center;font-size:12px;color:#64748b;margin-top:20px;">&copy; 2026 ${name} • Verified Setup by S7 Global LLC</footer></body></html>`;
-}
-
-function copyText(id) {
-  navigator.clipboard.writeText(document.getElementById(id).innerText);
-  alert('Copied to clipboard!');
-}
-
-
-function paidOf(c) { return c.status === 'live' ? 250 : 125; }
 function renderSprint() {
-  var total = clients.reduce(function(a, c) { return a + paidOf(c); }, 0);
-  var pct = Math.min(100, Math.round(total / 1000 * 100));
+  const total = clients.reduce(function(a, c) { return a + collectedOf(c); }, 0);
+  const pct = Math.min(100, Math.round(total / 1000 * 100));
   document.getElementById('sprintBar').style.width = pct + '%';
   document.getElementById('sprintText').innerText = '$' + total + ' of $1,000 collected • ' + pct + '%';
   document.getElementById('markerLine').innerText = clients.length + (clients.length === 1 ? ' CLIENT MARKER LIVE' : ' CLIENT MARKERS LIVE');
-  var sorted = clients.slice().sort(function(a, b) { return paidOf(b) - paidOf(a); });
+  const sorted = clients.slice().sort(function(a, b) { return collectedOf(b) - collectedOf(a); });
   document.getElementById('leaderList').innerHTML = sorted.length ? sorted.map(function(c, i) {
-    return '<div class="client-item"><div><strong>' + (i + 1) + '. ' + c.name + '</strong><div style="color:var(--muted);font-size:12px;">' + c.city + '</div></div><div style="font-weight:800;color:' + (c.status === 'live' ? 'var(--lime)' : 'var(--cyan)') + ';">$' + paidOf(c) + '</div></div>';
-  }).join('') : '<div style="color:var(--muted);font-size:13px;">No clients yet — your first $125 deposit puts you on the board.</div>';
+    return '<div class="client-item" style="display:flex;justify-content:space-between;align-items:center;"><div><strong>' + (i + 1) + '. ' + esc(c.name) + '</strong><div style="color:var(--muted);font-size:12px;">' + esc(c.city) + '</div></div><div style="font-weight:800;color:' + (c.stage === 'live' ? 'var(--lime)' : 'var(--cyan)') + ';">$' + collectedOf(c) + '</div></div>';
+  }).join('') : '<div style="color:var(--muted);font-size:13px;">No clients yet — your first deposit puts you on the board.</div>';
 }
-var _saveRenderOrig = saveRender;
-saveRender = function() { _saveRenderOrig(); renderSprint(); };
-// Animated globe: rotating dot sphere + pulsing client markers
+
+/* ---------- scripts & receipt (rendered from CATALOG plans) ---------- */
+function updateTemplates() {
+  const biz = document.getElementById('sBiz').value.trim() || '[Business Name]';
+  const owner = document.getElementById('sOwner').value.trim() || 'there';
+  const p = planOf(document.getElementById('sPlan').value || 'full');
+  const terms = p.deposit ? ('just $' + p.deposit + ' down today to start, and the final $' + p.balance + ' only when you are live on the map') : ('nothing due until you are live on the map, then $' + p.balance);
+  document.getElementById('pitchBox').innerText =
+    'Hey ' + owner + ', this is Marquez with S7 Global LLC in Atlanta. I noticed ' + biz + ' is not fully verified on Google Maps & Apple Maps yet, which sends nearby searches straight to competitors. I get local shops live on Google Search, Google Maps & Apple Maps (plus a starter website on Full Setup) for a flat $' + p.price + ' — ' + terms + '. You keep 100% ownership of your listings. Text me back here or email marquezspencervip@gmail.com and I will send the quick details. (My number is text only.)';
+  document.getElementById('receiptBox').innerText =
+    'S7 GLOBAL LLC — RECEIPT & AGREEMENT\nClient: ' + biz + ' (' + owner + ')\nProvider: S7 Global LLC (Marquez Spencer | marquezspencervip@gmail.com | 470-494-5855 TEXT ONLY)\nPackage: ' + p.name + ' — ' + p.includes.join('; ') + ' ($' + p.price + '.00 Flat)\n' +
+    (p.deposit ? 'Deposit Paid Today: $' + p.deposit + '.00 [RECEIVED]\nBalance Due Only When Live: $' + p.balance + '.00' : 'Due Today: $0.00\nBalance Due Only When Live: $' + p.balance + '.00') +
+    '\nOwnership: Client keeps 100% ownership; S7 Global LLC is manager only.\nThank you for choosing S7 Global LLC!';
+}
+
+/* ---------- web builder (all user input escaped) ---------- */
+function buildSite() {
+  const name = document.getElementById('wName').value.trim() || 'Local Shop ATL';
+  const city = document.getElementById('wCity').value.trim() || 'East Point, GA';
+  const phone = document.getElementById('wPhone').value.trim() || '(470) 555-0100';
+  const cleanPhone = phone.replace(/\D/g, '');
+  const addr = document.getElementById('wAddr').value.trim() || 'Atlanta, GA';
+  const hours = document.getElementById('wHours').value.trim() || 'Mon–Sat: 9:00 AM – 7:00 PM';
+  const svcs = (document.getElementById('wServices').value.trim() || 'Walk-Ins, Appointments, Local Service').split(',').map(function(s) { return '<li style="padding:8px 0;border-bottom:1px solid #eee;"><strong>' + esc(s.trim()) + '</strong></li>'; }).join('');
+  document.getElementById('siteOutput').innerText = '<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' + esc(name) + ' | ' + esc(city) + '</title></head><body style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:16px;background:#f8fafc;color:#0f172a;"><div style="background:#060B14;color:#fff;padding:28px 20px;border-radius:14px;text-align:center;"><div style="color:#00E5FF;font-size:12px;font-weight:700;text-transform:uppercase;">Serving ' + esc(city) + '</div><h1 style="margin:8px 0;">' + esc(name) + '</h1><a href="tel:' + cleanPhone + '" style="display:block;background:#00E5FF;color:#060B14;padding:14px;border-radius:10px;text-decoration:none;font-weight:800;margin-top:14px;">Call Now: ' + esc(phone) + '</a></div><div style="background:#fff;padding:18px;border-radius:12px;margin-top:14px;"><h2>Our Services</h2><ul style="list-style:none;padding:0;">' + svcs + '</ul></div><div style="background:#fff;padding:18px;border-radius:12px;margin-top:14px;"><h2>Location &amp; Hours</h2><p><strong>Address:</strong> ' + esc(addr) + '</p><p><strong>Hours:</strong> ' + esc(hours) + '</p></div><footer style="text-align:center;font-size:12px;color:#64748b;margin-top:20px;">&copy; 2026 ' + esc(name) + ' • Setup by S7 Global LLC</footer></body></html>';
+  toast('Client site generated');
+}
+
+/* ---------- export ---------- */
+function toCsv(rows, cols) {
+  return cols.join(',') + '\n' + rows.map(function(r) {
+    return cols.map(function(c) { return '"' + String(r[c] == null ? '' : r[c]).replace(/"/g, '""') + '"'; }).join(',');
+  }).join('\n');
+}
+function exportData(store, fmt) {
+  const rows = store === 'clients' ? clients : leads;
+  if (!rows.length) { toast('Nothing to export yet'); return; }
+  if (fmt === 'json') download('s7-' + store + '.json', JSON.stringify(rows, null, 2), 'application/json');
+  else if (store === 'clients') download('s7-clients.csv', toCsv(rows, ['id', 'name', 'owner', 'email', 'phone', 'city', 'plan', 'stage', 'createdAt']), 'text/csv');
+  else download('s7-leads.csv', toCsv(rows, ['id', 'biz', 'owner', 'phone', 'city', 'plan', 'msg', 'status', 'createdAt']), 'text/csv');
+  toast('Export downloaded');
+}
+
+/* ---------- animated globe (HQ) ---------- */
 (function() {
   var cv = document.getElementById('globeCanvas'); if (!cv) return;
   var ctx = cv.getContext('2d'); var W = cv.width, H = cv.height, cx = W / 2, cy = H / 2, R = 82;
   var pts = [];
-  for (var i = 0; i < 220; i++) {
-    var th = Math.acos(2 * Math.random() - 1), ph = Math.random() * Math.PI * 2;
-    pts.push({ th: th, ph: ph });
-  }
+  for (var i = 0; i < 220; i++) { var th = Math.acos(2 * Math.random() - 1), ph = Math.random() * Math.PI * 2; pts.push({ th: th, ph: ph }); }
   var ang = 0;
   function hashNum(str) { var h = 0; for (var i = 0; i < str.length; i++) { h = (h * 31 + str.charCodeAt(i)) % 9973; } return h / 9973; }
   function frame() {
@@ -270,7 +737,10 @@ saveRender = function() { _saveRenderOrig(); renderSprint(); };
 })();
 if ('serviceWorker' in navigator) { window.addEventListener('load', function() { navigator.serviceWorker.register('sw.js').catch(function() {}); }); }
 
+/* ---------- init ---------- */
+renderCatalog();
 saveRender();
+renderLeads();
 updateTemplates();
 </script>
 </body>
