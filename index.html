@@ -134,6 +134,10 @@ nav button { min-height:44px; }
       <p class="small" id="iosInstallHint" style="display:none;margin-top:10px;">📲 To install this app on iPhone: tap the Share button, then “Add to Home Screen.”</p>
     </div>
 
+    <div class="card" id="whatsNew" style="padding:12px 16px;">
+      <p class="small" style="margin:0;"><strong style="color:var(--lime);">🆕 What's new — V6.4:</strong> Maps Care is here. After your listing goes live, keep it working for $99/mo — monthly profile checks &amp; updates, Google posts, review replies, and a monthly report. You keep 100% ownership. See Plans &amp; Pricing to subscribe.</p>
+    </div>
+
     <div class="card" id="sec-process">
       <h2>How It Works</h2>
       <div id="stepsList"></div>
@@ -150,6 +154,7 @@ nav button { min-height:44px; }
     <div class="card division-section" data-division="maps" id="plans">
       <h2>Plans &amp; Pricing</h2>
       <div id="planCards"></div>
+      <div id="careCard"></div>
       <h2 style="margin-top:6px;">Compare Plans</h2>
       <div id="compareWrap"></div>
       <p class="small" style="margin-top:10px;">Refer a neighboring business and get a <strong style="color:var(--lime);">$25 credit</strong> when they sign up.</p>
@@ -355,7 +360,7 @@ nav button { min-height:44px; }
     <div id="tab-settings" class="tab-view">
       <div class="card">
         <h2>⚙️ Brand Settings — Owner Only</h2>
-        <p class="small" style="margin-bottom:10px;">Saved on this device only (localStorage: s7_brand_settings). These never appear as a prompt to public visitors. The public Pay Deposit button uses the built-in default Maps payment link unless you save an override below. Lead alerts likewise POST to the built-in default Formspree endpoint unless you save an override.</p>
+        <p class="small" style="margin-bottom:10px;">Saved on this device only (localStorage: s7_brand_settings). These never appear as a prompt to public visitors. The public Pay Deposit button uses the built-in default Maps payment link unless you save an override below. Lead alerts likewise POST to the built-in default Formspree endpoint unless you save an override. The Maps Care Subscribe button likewise uses its built-in default link unless you save an override.</p>
         <label class="fld" for="setPhone">Business Phone (reference)</label>
         <input type="tel" id="setPhone" placeholder="470-494-5855 (TEXT ONLY)" />
         <label class="fld" for="setMapPay">Maps Deposit Payment Link — Override (optional)</label>
@@ -366,6 +371,9 @@ nav button { min-height:44px; }
         <label class="fld" for="setWebhook">Lead Alert Webhook URL — Override (optional)</label>
         <input type="url" id="setWebhook" placeholder="Leave blank to use the built-in default endpoint" />
         <p class="small" style="margin-bottom:10px;">Built-in default (live now): <strong>https://formspree.io/f/mppdbovg</strong> — Formspree form "S7 HQ Leads", lead alerts emailed to marquezspencervip@gmail.com. Each new public request POSTs a copy (tracking ID, division, name, phone, plan) to the effective endpoint. Paste a different endpoint above only to override it; clear the field and save to go back to the default.</p>
+        <label class="fld" for="setCarePay">Maps Care Subscribe Link — Override (optional)</label>
+        <input type="url" id="setCarePay" placeholder="Leave blank to use the built-in default link" />
+        <p class="small" style="margin-bottom:10px;">Built-in default (live now): <strong>https://buy.stripe.com/14A8wR54B6L56ej7PncEw11</strong> — "S7 Maps Care — Monthly Management", $99/month recurring. This link powers the public Maps Care Subscribe button and the per-client Send Care Link text in Owner HQ. Paste a different link above only to override it; clear the field and save to go back to the default.</p>
         <button class="btn btn-lime" onclick="saveBrandSettings()">Save Settings to This Device</button>
       </div>
     </div>
@@ -426,7 +434,10 @@ nav button { min-height:44px; }
 
 <script>
 /* ============================================================
-   S7 GLOBAL HQ — V6.3 (default Formspree lead-alert webhook hardcoded,
+   S7 GLOBAL HQ — V6.4 (Maps Care $99/mo plan wired in: default Stripe
+   subscribe link hardcoded with Settings override, public Maps Care upsell
+   card, per-client care status + one-tap Send Care Link text. Builds on
+   V6.3 — default Formspree lead-alert webhook hardcoded,
    mirroring the V6.2 default-pay-link pattern. Builds on V6.2 — default
    Stripe pay link hardcoded + non-Maps/RE app content removed. Builds on
    V6 — owner playbook: Maps fulfillment checklist
@@ -499,6 +510,17 @@ const CATALOG = {
       ]
     }
   ],
+  carePlan: {
+    id: 'care', name: 'Maps Care', price: 99,
+    tagline: 'After you are live, we keep your listings working — monthly management, and you keep 100% ownership.',
+    includes: [
+      'Monthly profile checks & updates',
+      'Google posts',
+      'Review-response assistance',
+      'Monthly performance report',
+      'You keep 100% ownership — S7 Global is manager only'
+    ]
+  },
   compareRows: [
     { label: 'Price', full: '$250 flat', basic: '$150 flat' },
     { label: 'Due to start', full: '$125 down', basic: '$0 — due when live' },
@@ -549,9 +571,13 @@ const firebaseEnabled = Boolean(FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.projec
    Settings OVERRIDES the default; clearing the field falls back to the default.
    V6.3: same pattern for the lead-alert webhook — a built-in DEFAULT Formspree
    endpoint (owner's "S7 HQ Leads" form) is hardcoded, so lead alerts fire out
-   of the box; an owner-saved leadWebhookUrl overrides it, clearing restores it. */
+   of the box; an owner-saved leadWebhookUrl overrides it, clearing restores it.
+   V6.4: same pattern again for Maps Care — a built-in DEFAULT Stripe subscribe
+   link for the $99/mo plan is hardcoded, so the public Subscribe button shows
+   out of the box; an owner-saved carePayLink overrides it, clearing restores it. */
 const DEFAULT_MAP_PAY_LINK = 'https://buy.stripe.com/5kQ3cxdB72uPgSXb1zcEw10';
 const DEFAULT_LEAD_WEBHOOK = 'https://formspree.io/f/mppdbovg';
+const DEFAULT_CARE_PAY_LINK = 'https://buy.stripe.com/14A8wR54B6L56ej7PncEw11';
 const SETTINGS_KEY = 's7_brand_settings';
 function loadSettings() {
   try { const v = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}'); return (v && typeof v === 'object' && !Array.isArray(v)) ? v : {}; }
@@ -571,23 +597,32 @@ function effectiveLeadWebhook() {
   const saved = String(brandSettings.leadWebhookUrl || '').trim();
   return /^https?:\/\//i.test(saved) ? saved : DEFAULT_LEAD_WEBHOOK;
 }
+/* V6.4: the Maps Care subscribe link actually used: owner-saved override
+   wins, otherwise the built-in default Stripe link. Never empty. */
+function effectiveCarePayLink() {
+  const saved = String(brandSettings.carePayLink || '').trim();
+  return /^https?:\/\//i.test(saved) ? saved : DEFAULT_CARE_PAY_LINK;
+}
 function renderSettingsPublic() {
   const slot = document.getElementById('buyerPaySlot');
   if (slot) {
     const link = effectiveMapPayLink();
     slot.innerHTML = '<a class="btn btn-lime" href="' + esc(link) + '" target="_blank" rel="noopener">Pay Maps Deposit ($125)</a>';
   }
+  const cb = document.getElementById('careSubscribeBtn'); if (cb) cb.href = effectiveCarePayLink();
   const sf = document.getElementById('setPhone'); if (sf) sf.value = brandSettings.phone || '';
   const sm = document.getElementById('setMapPay'); if (sm) sm.value = brandSettings.mapPayLink || '';
   const sr = document.getElementById('setRePay'); if (sr) sr.value = brandSettings.rePayLink || '';
   const sw = document.getElementById('setWebhook'); if (sw) sw.value = brandSettings.leadWebhookUrl || '';
+  const sc = document.getElementById('setCarePay'); if (sc) sc.value = brandSettings.carePayLink || '';
 }
 function saveBrandSettings() {
   brandSettings = {
     phone: document.getElementById('setPhone').value.trim(),
     mapPayLink: document.getElementById('setMapPay').value.trim(),
     rePayLink: document.getElementById('setRePay').value.trim(),
-    leadWebhookUrl: document.getElementById('setWebhook').value.trim()
+    leadWebhookUrl: document.getElementById('setWebhook').value.trim(),
+    carePayLink: document.getElementById('setCarePay').value.trim()
   };
   persistSettings(); renderSettingsPublic();
   toast('Settings saved on this device');
@@ -635,6 +670,32 @@ function welcomeBtnHTML(rec, isRE) {
   const href = welcomeHref(rec, isRE);
   if (href) return '<a class="btn btn-cyan btn-small" href="' + href + '">\uD83D\uDCAC Welcome Text</a>';
   return '<button class="btn btn-outline btn-small" disabled title="No phone number on this record">\uD83D\uDCAC Welcome Text</button>';
+}
+
+/* ---------- V6.4: Maps Care — per-client status + one-tap Send Care Link ----------
+   careStatus lives on each client record ('none' | 'active'); legacy records
+   without the field normalize to 'none'. Send Care Link follows the Welcome
+   Text pattern: an sms: link to the CLIENT's own phone carrying the care
+   subscribe link (effective link: owner override, else built-in default). */
+function careStatusOf(c) { return c && c.careStatus === 'active' ? 'active' : 'none'; }
+function toggleCareStatus(id) {
+  clients = clients.map(function(c) {
+    if (c.id !== id) return c;
+    return Object.assign({}, c, { careStatus: careStatusOf(c) === 'active' ? 'none' : 'active' });
+  });
+  saveRender();
+}
+function careHref(rec) {
+  const phone = digitsOf(rec && rec.phone ? rec.phone : '');
+  if (!phone) return '';
+  const name = rec.owner || rec.name || 'there';
+  const body = 'Hi ' + name + ', this is S7 Global LLC \u2014 your listing is live. Keep it working with Maps Care: monthly profile checks & updates, Google posts, review-response help and a monthly performance report for $99/mo. Subscribe here: ' + effectiveCarePayLink() + ' You keep 100% ownership \u2014 S7 Global is manager only.';
+  return 'sms:' + phone + '?&body=' + encodeURIComponent(body);
+}
+function careBtnHTML(rec) {
+  const href = careHref(rec);
+  if (href) return '<a class="btn btn-lime btn-small" href="' + href + '">\uD83C\uDF3F Send Care Link</a>';
+  return '<button class="btn btn-outline btn-small" disabled title="No phone number on this record">\uD83C\uDF3F Send Care Link</button>';
 }
 
 /* ---------- PWA: data-URI manifest + install prompt ---------- */
@@ -991,6 +1052,14 @@ function renderCatalog() {
       '<p class="small" style="margin-top:6px;">' + esc(p.tagline) + '</p><ul>' + lis + excluded + '</ul>' +
       '<button class="btn ' + (p.featured ? 'btn-lime' : 'btn-cyan') + '" onclick="choosePlan(\'' + p.id + '\')">Choose ' + esc(p.name) + '</button></div>';
   }).join('');
+  const care = CATALOG.carePlan;
+  document.getElementById('careCard').innerHTML = '<div class="plan-card">' +
+    '<div style="color:var(--cyan);font-size:11px;font-weight:800;letter-spacing:.6px;">AFTER YOU ARE LIVE — OPTIONAL MONTHLY</div>' +
+    '<div style="font-weight:800;font-size:17px;">' + esc(care.name) + ' — Monthly Management</div>' +
+    '<div class="plan-price">$' + care.price + ' <span style="font-size:13px;color:var(--muted);font-weight:600;">/month</span></div>' +
+    '<p class="small" style="margin-top:6px;">' + esc(care.tagline) + '</p><ul>' +
+    care.includes.map(function(i) { return '<li>✅ ' + esc(i) + '</li>'; }).join('') + '</ul>' +
+    '<a class="btn btn-lime" id="careSubscribeBtn" href="' + esc(effectiveCarePayLink()) + '" target="_blank" rel="noopener">Subscribe — Maps Care $99/mo</a></div>';
   document.getElementById('compareWrap').innerHTML = '<table class="compare"><tr><th></th>' +
     CATALOG.plans.map(function(p) { return '<th>' + esc(p.name) + '</th>'; }).join('') + '</tr>' +
     CATALOG.compareRows.map(function(r) {
@@ -1087,7 +1156,7 @@ function leadToClient(id) {
   const l = leads.find(function(x) { return x.id === id; });
   if (!l) return;
   if ((l.division || 'maps') === 'real-estate') { toast('Real Estate leads stay in Leads \u2014 clients are Maps only'); return; }
-  clients.unshift({ id: Date.now(), trackId: l.trackId || genTrackId(), name: l.biz, owner: l.owner || '', email: '', phone: l.phone || '', city: l.city || 'Atlanta, GA', plan: l.plan || 'full', stage: 'deposit', fulfill: defaultFulfill(), createdAt: new Date().toISOString() });
+  clients.unshift({ id: Date.now(), trackId: l.trackId || genTrackId(), name: l.biz, owner: l.owner || '', email: '', phone: l.phone || '', city: l.city || 'Atlanta, GA', plan: l.plan || 'full', stage: 'deposit', careStatus: 'none', fulfill: defaultFulfill(), createdAt: new Date().toISOString() });
   leads = leads.filter(function(x) { return x.id !== id; });
   saveStore('s7_leads', leads); saveRender(); renderLeads();
   hqTab('clients'); toast('Lead converted to client');
@@ -1125,6 +1194,7 @@ function normalizeClient(c) {
     id: c.id || Date.now(), name: c.name || 'Unnamed', owner: c.owner || '', email: c.email || '',
     phone: c.phone || '', city: c.city || 'Atlanta, GA', plan: c.plan || 'full',
     stage: ['deposit', 'setup', 'live'].indexOf(stage) >= 0 ? stage : 'deposit',
+    careStatus: c.careStatus === 'active' ? 'active' : 'none',
     trackId: c.trackId || '',
     fulfill: normalizeFulfill(c.fulfill),
     createdAt: c.createdAt || ''
@@ -1153,7 +1223,7 @@ function addClient() {
     });
     toast('Client updated');
   } else {
-    clients.unshift({ id: Date.now(), trackId: genTrackId(), name: name, owner: owner, email: email, phone: phone, city: city, plan: plan, stage: stage, fulfill: defaultFulfill(), createdAt: new Date().toISOString() });
+    clients.unshift({ id: Date.now(), trackId: genTrackId(), name: name, owner: owner, email: email, phone: phone, city: city, plan: plan, stage: stage, careStatus: 'none', fulfill: defaultFulfill(), createdAt: new Date().toISOString() });
     toast('Client added');
   }
   cancelEdit(); saveRender();
@@ -1216,10 +1286,12 @@ function saveRender() {
       return '<div class="client-item"><div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start;">' +
         '<div><div style="font-weight:700;font-size:14px;">' + esc(c.name) + '</div>' +
         '<div style="font-size:12px;color:var(--muted);">' + esc(c.city) + ' • ' + esc(c.phone || 'No phone') + (c.owner ? ' • ' + esc(c.owner) : '') + (c.email ? ' • ' + esc(c.email) : '') + '</div>' +
-        '<div style="font-size:12px;color:var(--muted);">' + esc(p.name) + ' $' + p.price + ' — collected $' + collectedOf(c) + ', pending $' + pendingOf(c) + (c.trackId ? ' • ID ' + esc(c.trackId) : '') + '</div></div>' +
+        '<div style="font-size:12px;color:var(--muted);">' + esc(p.name) + ' $' + p.price + ' — collected $' + collectedOf(c) + ', pending $' + pendingOf(c) + (c.trackId ? ' • ID ' + esc(c.trackId) : '') + ' • Maps Care: ' + (careStatusOf(c) === 'active' ? 'Active' : 'Not subscribed') + '</div></div>' +
         '<span class="status-pill st-' + c.stage + '" onclick="cycleStage(' + c.id + ')">' + STAGE_LABEL[c.stage] + '</span></div>' +
         '<div style="margin-top:8px;"><button class="btn btn-outline btn-small" onclick="editClient(' + c.id + ')">Edit</button>' +
         welcomeBtnHTML(c, false) +
+        careBtnHTML(c) +
+        '<button class="btn btn-outline btn-small" onclick="toggleCareStatus(' + c.id + ')">' + (careStatusOf(c) === 'active' ? 'Care: Active ✓ — tap to clear' : 'Mark Care Active') + '</button>' +
         '<button class="btn btn-danger btn-small" onclick="deleteClient(' + c.id + ')">Delete</button></div>' + extra + '</div>';
     }).join('');
     // recompute totals cleanly (map above already added per item)
@@ -1256,7 +1328,7 @@ function exportData(store, fmt) {
   const rows = store === 'clients' ? clients : leads;
   if (!rows.length) { toast('Nothing to export yet'); return; }
   if (fmt === 'json') download('s7-' + store + '.json', JSON.stringify(rows, null, 2), 'application/json');
-  else if (store === 'clients') download('s7-clients.csv', toCsv(rows, ['id', 'trackId', 'name', 'owner', 'email', 'phone', 'city', 'plan', 'stage', 'createdAt']), 'text/csv');
+  else if (store === 'clients') download('s7-clients.csv', toCsv(rows, ['id', 'trackId', 'name', 'owner', 'email', 'phone', 'city', 'plan', 'stage', 'careStatus', 'createdAt']), 'text/csv');
   else download('s7-leads.csv', toCsv(rows, ['id', 'trackId', 'division', 'leadType', 'biz', 'owner', 'phone', 'city', 'plan', 'address', 'timeline', 'askingPrice', 'repairLevel', 'msg', 'status', 'createdAt']), 'text/csv');
   toast('Export downloaded');
 }
