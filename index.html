@@ -77,22 +77,53 @@ details.faq p { color:var(--muted); font-size:13px; line-height:1.5; margin-top:
 header { flex-wrap:wrap; gap:8px; }
 .div-card { border:1px solid var(--border); border-radius:14px; padding:16px; margin-bottom:12px; background:#060B14; }
 .div-card h3 { font-size:16px; margin-bottom:4px; }
+
+/* ---------- V5: menu drawer, scroll-spy, track modal ---------- */
+html { scroll-behavior: smooth; }
+#view-home .card { scroll-margin-top: 92px; }
+.nav-pills { display:flex; gap:6px; flex-wrap:wrap; }
+.nav-pills button { background:#060B14; border:1px solid var(--border); color:var(--muted); border-radius:999px; padding:8px 12px; font-size:12px; font-weight:700; cursor:pointer; min-height:44px; }
+.nav-pills button.active { color:#060B14; background:var(--cyan); border-color:var(--cyan); }
+nav button { min-height:44px; }
+#navDrawerBackdrop { position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:80; display:none; }
+#navDrawerBackdrop.open { display:block; }
+#navDrawer { position:fixed; top:0; right:0; height:100%; width:88%; max-width:360px; background:var(--card); border-left:1px solid var(--border); z-index:81; transform:translateX(105%); transition:transform .25s ease; overflow-y:auto; padding:16px; }
+#navDrawer.open { transform:translateX(0); }
+#navDrawer h3 { font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.6px; margin:16px 0 8px; }
+.drawer-link { display:block; width:100%; text-align:left; background:#060B14; border:1px solid var(--border); color:var(--text); border-radius:10px; padding:12px; font-size:14px; font-weight:600; cursor:pointer; margin-bottom:8px; min-height:44px; }
+.modal-wrap { position:fixed; inset:0; background:rgba(0,0,0,.65); z-index:90; display:none; align-items:flex-start; justify-content:center; padding:22px 14px; overflow-y:auto; }
+.modal-wrap.open { display:flex; }
+.modal-box { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:18px; width:100%; max-width:520px; }
+.track-steps { display:flex; gap:6px; margin:12px 0 4px; }
+.track-step { flex:1; text-align:center; font-size:11px; font-weight:700; color:var(--muted); }
+.track-step .dot { height:10px; border-radius:999px; background:var(--border); margin-bottom:6px; }
+.track-step.done { color:var(--cyan); }
+.track-step.done .dot { background:var(--cyan); }
+.track-step.current { color:var(--lime); }
+.track-step.current .dot { background:var(--lime); }
 </style>
 </head>
 <body>
 <header>
-  <div class="brand">
+  <div class="brand" id="brandHome" onclick="goHome()" style="cursor:pointer;" title="S7 Global LLC — Home">
     <svg width="28" height="28" viewBox="0 0 60 60" fill="none"><rect x="2" y="2" width="56" height="56" rx="14" fill="#060B14" stroke="#00E5FF" stroke-width="3"/><text x="15" y="37" fill="#84CC16" font-family="sans-serif" font-weight="900" font-size="22">S7</text></svg>
     S7 GLOBAL LLC
   </div>
   <span class="badge">MAPS • REAL ESTATE</span>
+  <div class="nav-pills" id="topPills">
+    <button data-navpill="home" class="active" onclick="navigateTo('home')">Home</button>
+    <button data-navpill="divisions" onclick="navigateTo('divisions')">Divisions</button>
+    <button data-navpill="process" onclick="navigateTo('process')">How It Works</button>
+    <button data-navpill="track" onclick="openTrackModal()">Track Order</button>
+  </div>
+  <button id="menuBtn" class="btn btn-cyan btn-small" style="margin:0;min-height:44px;" aria-expanded="false" onclick="openNavMenu()">☰ Menu</button>
   <button id="installBtn" class="btn btn-outline btn-small" style="margin:0;" onclick="triggerInstall()">⬇️ Install App</button>
 </header>
 
 <!-- ================= PUBLIC BUYER FRONT ================= -->
 <div id="view-home" class="view active">
   <div class="container">
-    <div class="card hero">
+    <div class="card hero" id="sec-home">
       <div style="font-size:34px;">📍</div>
       <h1>S7 Global LLC — <span>Maps &amp; Real Estate.</span></h1>
       <p>Two ways we help Metro Atlanta: <strong style="color:var(--text);">📍 Maps</strong> — we set up and verify your shop on Google Search, Google Maps &amp; Apple Maps so nearby customers find you. <strong style="color:var(--text);">🏠 Real Estate</strong> — S7 Global Real Estate buys houses as-is and connects cash buyers with deals.</p>
@@ -103,7 +134,7 @@ header { flex-wrap:wrap; gap:8px; }
       <p class="small" id="iosInstallHint" style="display:none;margin-top:10px;">📲 To install this app on iPhone: tap the Share button, then “Add to Home Screen.”</p>
     </div>
 
-    <div class="card">
+    <div class="card" id="sec-process">
       <h2>How It Works</h2>
       <div id="stepsList"></div>
       <p class="small">Timelines depend on Google's verification process — we handle the setup and verification steps with you, and your balance is only due when your listing is live.</p>
@@ -189,7 +220,7 @@ header { flex-wrap:wrap; gap:8px; }
       <a class="btn btn-outline" href="mailto:marquezspencervip@gmail.com?subject=MAPS%20Setup%20Request">Email for a Faster Response</a>
       <div id="buyerPaySlot"></div>
     </div>
-    <p class="small" style="text-align:center;">Business owner? This page is the public S7 Global offer. S7 Global staff: use the Owner HQ tab below.</p>
+    <p class="small" style="text-align:center;">Business owner? This page is the public S7 Global offer. S7 Global staff: open Menu → Owner HQ.</p>
   </div>
 </div>
 
@@ -354,18 +385,61 @@ header { flex-wrap:wrap; gap:8px; }
   </div>
 </div>
 
+
+<!-- ================= V5: MENU DRAWER ================= -->
+<div id="navDrawerBackdrop" onclick="closeNavMenu()"></div>
+<aside id="navDrawer" aria-hidden="true">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+    <div style="font-weight:800;font-size:15px;">S7 GLOBAL LLC<br/><span style="font-size:11px;color:var(--muted);font-weight:600;">Navigation &amp; Order Lookup</span></div>
+    <button class="btn btn-outline btn-small" style="min-height:44px;" onclick="closeNavMenu()" aria-label="Close menu">✕ Close</button>
+  </div>
+  <h3>🔍 Track Your Order</h3>
+  <label class="fld" for="drawerLookupInput">Order ID (S7-XXXXX) or Phone</label>
+  <input type="text" id="drawerLookupInput" placeholder="e.g., S7-12345 or your phone number" />
+  <button class="btn btn-cyan" onclick="handleDrawerLookup()">Check Status</button>
+  <div id="drawerLookupResult" style="display:none;"></div>
+  <h3>Platform Navigation</h3>
+  <button class="drawer-link" onclick="drawerGo('sec-home')">🏠 Home Overview</button>
+  <button class="drawer-link" onclick="drawerGo('divisions')">🏢 All Divisions (2 Active)</button>
+  <button class="drawer-link" onclick="drawerGo('sec-process')">⚡ How It Works — 3 Steps</button>
+  <button class="drawer-link" onclick="drawerGo('plans')">💲 Plans &amp; Pricing</button>
+  <h3>Direct Division Booking</h3>
+  <button class="drawer-link" onclick="drawerBook('maps')">📍 Map Verification — $250 Flat<br/><span style="font-size:12px;color:var(--muted);font-weight:600;">Google Search, Google Maps &amp; Apple Maps (50/50 split)</span></button>
+  <button class="drawer-link" onclick="drawerBook('real-estate')">🏠 Real Estate — Cash Offer Intake<br/><span style="font-size:12px;color:var(--muted);font-weight:600;">Sell as-is, join the VIP cash buyers list, or get deals</span></button>
+  <h3>Your Order &amp; S7 Global</h3>
+  <button class="drawer-link" onclick="drawerTrack()">🔍 Track Order Status</button>
+  <button class="drawer-link" onclick="drawerHQ()">🔐 Owner HQ</button>
+  <h3>Contact — Text Only</h3>
+  <div id="drawerContactFooter"></div>
+</aside>
+
+<!-- ================= V5: TRACK ORDER MODAL ================= -->
+<div id="trackModal" class="modal-wrap" onclick="if(event.target===this)closeTrackModal()">
+  <div class="modal-box">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;">
+      <div style="font-weight:800;font-size:16px;">🔍 Client Order Status Tracker</div>
+      <button class="btn btn-outline btn-small" style="min-height:44px;" onclick="closeTrackModal()" aria-label="Close tracker">✕</button>
+    </div>
+    <p class="small" style="margin-bottom:10px;">Enter your S7 Order ID (e.g., S7-12345) or the phone number you used. Tracking looks up requests saved in this app on this device.</p>
+    <label class="fld" for="trackInput">Order ID or Phone</label>
+    <input type="text" id="trackInput" placeholder="S7-XXXXX or phone number" />
+    <button class="btn btn-lime" onclick="handleModalLookup()">Track</button>
+    <div id="trackResult"><p class="small">Your milestone tracker (Claimed → In Setup / Verified → Live) will appear here.</p></div>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <nav>
-  <button id="nav-home" class="active" onclick="showView('home', this)">🏠 Home</button>
-  <button id="nav-plans" onclick="navPlans(this)">💲 Plans</button>
-  <button id="nav-start" onclick="navStart(this)">🚀 Get Started</button>
-  <button id="nav-hq" onclick="showView('hq', this)">🔐 Owner HQ</button>
+  <button id="nav-home" class="active" onclick="navHome(this)">🏠 Home</button>
+  <button id="nav-divisions" onclick="navDivisions(this)">🏢 Divisions</button>
+  <button id="nav-track" onclick="openTrackModal()">🔍 Track</button>
+  <button id="nav-menu" onclick="openNavMenu()">☰ Menu</button>
 </nav>
 
 <script>
 /* ============================================================
-   S7 GLOBAL HQ — V4 (Maps + Real Estate divisions, PWA)
+   S7 GLOBAL HQ — V5 (menu drawer, scroll-spy, real order tracking — no demo data)
    1) CATALOG: single source of truth for plans/services/steps/FAQs.
       All buyer-facing pricing, checklists, comparisons and steps
       are RENDERED from this object — never hard-code prices in HTML.
@@ -627,6 +701,195 @@ function download(filename, text, mime) {
   setTimeout(function() { URL.revokeObjectURL(a.href); a.remove(); }, 400);
 }
 
+/* ---------- V5: order tracking (REAL records only — no demo seed) ---------- */
+function digitsOf(s) { return String(s == null ? '' : s).replace(/\D/g, ''); }
+function trackIdSet() {
+  const s = {};
+  leads.concat(clients).forEach(function(r) { if (r && r.trackId) s[r.trackId] = true; });
+  return s;
+}
+function genTrackId() {
+  const used = trackIdSet();
+  for (let i = 0; i < 500; i++) {
+    const cand = 'S7-' + (10000 + Math.floor(Math.random() * 90000));
+    if (!used[cand]) return cand;
+  }
+  for (let n = 10000; n <= 99999; n++) { if (!used['S7-' + n]) return 'S7-' + n; }
+  return 'S7-' + Date.now();
+}
+function ensureTrackIds() {
+  let changed = false;
+  leads.forEach(function(l) { if (!l.trackId) { l.trackId = genTrackId(); changed = true; } });
+  clients.forEach(function(c) { if (!c.trackId) { c.trackId = genTrackId(); changed = true; } });
+  if (changed) { saveStore('s7_leads', leads); saveStore('s7_clients', clients); }
+}
+function findOrderByQuery(raw) {
+  const q = String(raw == null ? '' : raw).trim();
+  if (!q) return null;
+  const qu = q.toUpperCase();
+  const pools = [
+    { kind: 'lead', rows: leads },
+    { kind: 'client', rows: clients }
+  ];
+  let i, j, rows, r;
+  // 1) exact tracking-ID match
+  for (i = 0; i < pools.length; i++) { rows = pools[i].rows; for (j = 0; j < rows.length; j++) { r = rows[j]; if (r.trackId && r.trackId.toUpperCase() === qu) return { kind: pools[i].kind, rec: r }; } }
+  // 2) partial tracking-ID match (query must look like an ID fragment, 4+ chars)
+  if (qu.replace(/[^A-Z0-9]/g, '').length >= 4) {
+    for (i = 0; i < pools.length; i++) { rows = pools[i].rows; for (j = 0; j < rows.length; j++) { r = rows[j]; if (r.trackId && r.trackId.toUpperCase().indexOf(qu) >= 0) return { kind: pools[i].kind, rec: r }; } }
+  }
+  // 3) phone match — requires >= 7 digits. AI Mode used >= 4, which false-matches
+  //    short fragments (area-code pieces, prices, ZIP fragments) against many records;
+  //    7 digits is the smallest locally-unique phone fragment.
+  const dq = digitsOf(q);
+  if (dq.length >= 7) {
+    for (i = 0; i < pools.length; i++) { rows = pools[i].rows; for (j = 0; j < rows.length; j++) { r = rows[j]; if (r.phone && digitsOf(r.phone).indexOf(dq) >= 0) return { kind: pools[i].kind, rec: r }; } }
+  }
+  return null;
+}
+function trackStepOf(found) {
+  const r = found.rec;
+  if ((r.division || (found.kind === 'client' ? 'maps' : 'maps')) === 'real-estate') return 1;
+  if (found.kind === 'client') return r.stage === 'live' ? 3 : (r.stage === 'setup' ? 2 : 1);
+  return 1; // a saved lead = Claimed (1/3) until converted and advanced in the pipeline
+}
+function buildStatusCardHTML(found, queryText) {
+  if (!found) {
+    return '<div style="background:rgba(248,113,113,.12);border:1px solid var(--danger);border-radius:10px;padding:12px;margin-top:8px;">' +
+      '<div style="font-weight:800;color:var(--danger);">No order found for \u201C' + esc(queryText) + '\u201D</div>' +
+      '<p class="small" style="margin-top:4px;">Double-check your S7-XXXXX ID or the phone number you used. Tracking looks up requests saved in this app on this device.</p></div>';
+  }
+  const r = found.rec;
+  const isRE = (r.division || (found.kind === 'client' ? 'maps' : 'maps')) === 'real-estate';
+  const name = r.biz || r.name || 'Request';
+  const date = (r.createdAt || '').slice(0, 10);
+  let head = '<div style="background:#060B14;border:1px solid var(--cyan);border-radius:10px;padding:12px;margin-top:8px;">' +
+    '<div style="font-weight:900;font-size:17px;color:var(--cyan);letter-spacing:.5px;">' + esc(r.trackId || '') + '</div>' +
+    '<div style="font-weight:700;font-size:14px;">' + esc(name) + '</div>' +
+    '<div style="font-size:12px;color:var(--muted);">' + (isRE ? 'S7 Global Real Estate' : 'S7 Global LLC \u2014 Map Verification') + (date ? ' \u2022 ' + esc(date) : '') + '</div>';
+  if (!isRE) {
+    const p = planOf(r.plan || 'full');
+    head += '<div style="font-size:12px;color:var(--muted);">' + esc(p.name) + ' \u2014 $' + p.price + ' flat</div>';
+  }
+  if (isRE) {
+    return head +
+      '<div class="track-steps"><div class="track-step current"><div class="dot"></div>Intake Received</div></div>' +
+      '<p class="small">Intake received \u2014 S7 Global Real Estate has your request in this app. For a live update, text us (text only) or email \u2014 fastest response.</p></div>';
+  }
+  const step = trackStepOf(found);
+  const labels = ['Claimed', 'In Setup / Verified', 'Live'];
+  const steps = labels.map(function(lbl, i) {
+    const n = i + 1;
+    const cls = n < step ? 'done' : (n === step ? 'current' : '');
+    return '<div class="track-step ' + cls + '"><div class="dot"></div>' + (n) + '. ' + lbl + '</div>';
+  }).join('');
+  return head + '<div class="track-steps">' + steps + '</div>' +
+    '<p class="small">Step ' + step + ' of 3 \u2014 ' + labels[step - 1] + '.</p></div>';
+}
+function runLookup(inputId, resultId) {
+  const input = document.getElementById(inputId);
+  const out = document.getElementById(resultId);
+  if (!input || !out) return;
+  const q = input.value;
+  out.style.display = 'block';
+  out.innerHTML = buildStatusCardHTML(findOrderByQuery(q), q);
+}
+function handleDrawerLookup() { runLookup('drawerLookupInput', 'drawerLookupResult'); }
+function handleModalLookup() { runLookup('trackInput', 'trackResult'); }
+function openTrackModal(prefillId) {
+  const m = document.getElementById('trackModal');
+  if (m) m.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  if (prefillId) {
+    const input = document.getElementById('trackInput');
+    if (input) input.value = prefillId;
+    handleModalLookup();
+  }
+}
+function closeTrackModal() {
+  const m = document.getElementById('trackModal');
+  if (m) m.classList.remove('open');
+  if (!document.getElementById('navDrawer').classList.contains('open')) document.body.style.overflow = '';
+}
+
+/* ---------- V5: slide-out menu drawer ---------- */
+function renderDrawerContact() {
+  const f = document.getElementById('drawerContactFooter');
+  if (!f) return;
+  f.innerHTML = '<p class="small" style="margin-bottom:8px;">\uD83D\uDCF1 <strong style="color:var(--text);">' + esc(CATALOG.business.phoneDisplay) + ' \u2014 ' + esc(CATALOG.business.phoneLabel) + '</strong></p>' +
+    '<a class="btn btn-cyan" href="sms:' + CATALOG.business.phoneSms + '?&amp;body=' + encodeURIComponent('Hi S7 Global LLC, I would like to get started.') + '">Text S7 Global (Text Only)</a>' +
+    '<a class="btn btn-outline" href="mailto:' + CATALOG.business.email + '">Email \u2014 Faster Response</a>';
+}
+function openNavMenu() {
+  renderDrawerContact();
+  document.getElementById('navDrawer').classList.add('open');
+  document.getElementById('navDrawer').setAttribute('aria-hidden', 'false');
+  document.getElementById('navDrawerBackdrop').classList.add('open');
+  const btn = document.getElementById('menuBtn');
+  if (btn) btn.setAttribute('aria-expanded', 'true');
+  document.body.style.overflow = 'hidden';
+}
+function closeNavMenu() {
+  const d = document.getElementById('navDrawer');
+  if (d) { d.classList.remove('open'); d.setAttribute('aria-hidden', 'true'); }
+  const b = document.getElementById('navDrawerBackdrop');
+  if (b) b.classList.remove('open');
+  const btn = document.getElementById('menuBtn');
+  if (btn) btn.setAttribute('aria-expanded', 'false');
+  if (!document.getElementById('trackModal').classList.contains('open')) document.body.style.overflow = '';
+}
+function drawerGo(id) { closeNavMenu(); goSection(id); }
+function drawerBook(division) { closeNavMenu(); chooseDivision(division); }
+function drawerTrack() { closeNavMenu(); openTrackModal(); }
+function drawerHQ() { closeNavMenu(); showView('hq', null); }
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape' || e.keyCode === 27) { closeNavMenu(); closeTrackModal(); }
+});
+
+/* ---------- V5: scroll-spy + nav ---------- */
+function setActiveNav(section) {
+  document.querySelectorAll('[data-navpill]').forEach(function(b) {
+    b.classList.toggle('active', b.getAttribute('data-navpill') === section);
+  });
+  const home = document.getElementById('nav-home');
+  const divs = document.getElementById('nav-divisions');
+  if (home) home.classList.toggle('active', section === 'home');
+  if (divs) divs.classList.toggle('active', section === 'divisions');
+}
+const SPY_SECTIONS = [ ['home', 'sec-home'], ['divisions', 'divisions'], ['process', 'sec-process'] ];
+function onScrollSpy() {
+  const hv = document.getElementById('view-home');
+  if (!hv || !hv.classList.contains('active')) return;
+  const y = (window.scrollY || 0) + 140;
+  let current = 'home';
+  SPY_SECTIONS.forEach(function(pair) {
+    const el = document.getElementById(pair[1]);
+    if (!el) return;
+    let top = 0, node = el;
+    while (node) { top += node.offsetTop || 0; node = node.offsetParent; }
+    if (top <= y) current = pair[0];
+  });
+  setActiveNav(current);
+}
+function setupScrollSpy() { window.addEventListener('scroll', onScrollSpy); onScrollSpy(); }
+function navigateTo(section) {
+  const map = { home: 'sec-home', divisions: 'divisions', process: 'sec-process' };
+  goSection(map[section] || 'sec-home');
+  setActiveNav(section);
+}
+function goHome() {
+  showView('home', document.getElementById('nav-home'));
+  window.scrollTo(0, 0);
+  setActiveNav('home');
+}
+function navHome(el) { showView('home', el); setActiveNav('home'); }
+function navDivisions(el) {
+  goSection('divisions');
+  document.querySelectorAll('nav button').forEach(function(b) { b.classList.remove('active'); });
+  if (el) el.classList.add('active');
+  setActiveNav('divisions');
+}
+
 /* ---------- navigation ---------- */
 function showView(view, el) {
   document.querySelectorAll('.view').forEach(function(v) { v.classList.remove('active'); });
@@ -714,13 +977,13 @@ function submitLead() {
     const leadType = document.getElementById('leadType').value;
     const address = document.getElementById('leadAddr').value.trim();
     const timeline = document.getElementById('leadTimeline').value.trim();
-    lead = { id: Date.now(), division: 'real-estate', leadType: leadType, biz: biz, owner: owner, phone: phone, city: city, plan: '', address: address, timeline: timeline, msg: msg, status: 'new', createdAt: new Date().toISOString() };
+    lead = { id: Date.now(), trackId: genTrackId(), division: 'real-estate', leadType: leadType, biz: biz, owner: owner, phone: phone, city: city, plan: '', address: address, timeline: timeline, msg: msg, status: 'new', createdAt: new Date().toISOString() };
     body = 'REAL ESTATE \u2014 New ' + leadType + ' request: ' + biz + (owner ? ' (' + owner + ')' : '') + ', Phone: ' + phone + (address ? ', Property: ' + address : '') + (city ? ', Area: ' + city : '') + (timeline ? ', Timeline: ' + timeline : '') + (msg ? ', Details: ' + msg : '');
     subject = 'Real Estate Request \u2014 ' + biz;
   } else {
     const plan = document.getElementById('leadPlan').value;
     const p = planOf(plan);
-    lead = { id: Date.now(), division: 'maps', leadType: '', biz: biz, owner: owner, phone: phone, city: city, plan: plan, address: '', timeline: '', msg: msg, status: 'new', createdAt: new Date().toISOString() };
+    lead = { id: Date.now(), trackId: genTrackId(), division: 'maps', leadType: '', biz: biz, owner: owner, phone: phone, city: city, plan: plan, address: '', timeline: '', msg: msg, status: 'new', createdAt: new Date().toISOString() };
     body = 'MAPS \u2014 New request: ' + biz + (owner ? ' (' + owner + ')' : '') + ', ' + (city || 'Metro Atlanta') + ', Phone: ' + phone + ', Plan: ' + p.name + ' $' + p.price + (msg ? ', Note: ' + msg : '');
     subject = 'MAPS Setup Request \u2014 ' + biz;
   }
@@ -729,9 +992,12 @@ function submitLead() {
   box.style.display = 'block';
   box.innerHTML = '<div style="background:rgba(132,204,22,.12);border:1px solid var(--lime);border-radius:10px;padding:12px;margin-top:6px;">' +
     '<div style="font-weight:800;color:var(--lime);margin-bottom:6px;">\u2705 Request saved on this device</div>' +
+    '<div style="font-size:21px;font-weight:900;color:var(--cyan);letter-spacing:1px;">' + esc(lead.trackId) + '</div>' +
+    '<p class="small" style="margin-bottom:8px;">Your tracking ID \u2014 save it. Check your status anytime from Menu \u2192 Track Order.</p>' +
     '<p class="small" style="margin-bottom:10px;">Last step \u2014 send it to S7 Global so we actually receive it:</p>' +
     '<a class="btn btn-lime" href="sms:' + CATALOG.business.phoneSms + '?&amp;body=' + encodeURIComponent(body) + '">Text It \u2014 470-494-5855 (Text Only)</a>' +
-    '<a class="btn btn-outline" href="mailto:' + CATALOG.business.email + '?subject=' + encodeURIComponent(subject) + '&amp;body=' + encodeURIComponent(body) + '">Email It \u2014 Faster Response</a></div>';
+    '<a class="btn btn-outline" href="mailto:' + CATALOG.business.email + '?subject=' + encodeURIComponent(subject) + '&amp;body=' + encodeURIComponent(body) + '">Email It \u2014 Faster Response</a>' +
+    '<button class="btn btn-cyan" onclick="openTrackModal(\'' + lead.trackId + '\')">\uD83D\uDD0D Track My Order</button></div>';
   toast('Request saved');
   if (box.scrollIntoView) box.scrollIntoView({ behavior: 'smooth' });
 }
@@ -748,7 +1014,7 @@ function renderLeads() {
       : esc(planOf(l.plan).name) + ' $' + planOf(l.plan).price + ' \u2022 Maps';
     return '<div class="client-item"><div style="font-weight:700;font-size:14px;">' + esc(l.biz) + '</div>' +
       '<div style="font-size:12px;color:var(--muted);">' + esc(l.owner || 'Name n/a') + ' \u2022 ' + esc(l.city || 'City n/a') + ' \u2022 ' + esc(l.phone) + '</div>' +
-      '<div style="font-size:12px;color:var(--muted);">' + detail + ' \u2022 ' + esc((l.createdAt || '').slice(0, 10)) + (l.msg ? ' \u2022 ' + esc(l.msg) : '') + '</div>' +
+      '<div style="font-size:12px;color:var(--muted);">' + detail + ' \u2022 ' + esc((l.createdAt || '').slice(0, 10)) + (l.trackId ? ' \u2022 ID ' + esc(l.trackId) : '') + (l.msg ? ' \u2022 ' + esc(l.msg) : '') + '</div>' +
       '<div style="margin-top:8px;">' + (isRE ? '' : '<button class="btn btn-lime btn-small" onclick="leadToClient(' + l.id + ')">Convert to Client</button>') +
       '<button class="btn btn-danger btn-small" onclick="deleteLead(' + l.id + ')">Delete</button></div></div>';
   }).join('');
@@ -762,7 +1028,7 @@ function leadToClient(id) {
   const l = leads.find(function(x) { return x.id === id; });
   if (!l) return;
   if ((l.division || 'maps') === 'real-estate') { toast('Real Estate leads stay in Leads \u2014 clients are Maps only'); return; }
-  clients.unshift({ id: Date.now(), name: l.biz, owner: l.owner || '', email: '', phone: l.phone || '', city: l.city || 'Atlanta, GA', plan: l.plan || 'full', stage: 'deposit', createdAt: new Date().toISOString() });
+  clients.unshift({ id: Date.now(), trackId: l.trackId || genTrackId(), name: l.biz, owner: l.owner || '', email: '', phone: l.phone || '', city: l.city || 'Atlanta, GA', plan: l.plan || 'full', stage: 'deposit', createdAt: new Date().toISOString() });
   leads = leads.filter(function(x) { return x.id !== id; });
   saveStore('s7_leads', leads); saveRender(); renderLeads();
   hqTab('clients'); toast('Lead converted to client');
@@ -855,7 +1121,7 @@ function saveRender() {
       return '<div class="client-item"><div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start;">' +
         '<div><div style="font-weight:700;font-size:14px;">' + esc(c.name) + '</div>' +
         '<div style="font-size:12px;color:var(--muted);">' + esc(c.city) + ' • ' + esc(c.phone || 'No phone') + (c.owner ? ' • ' + esc(c.owner) : '') + (c.email ? ' • ' + esc(c.email) : '') + '</div>' +
-        '<div style="font-size:12px;color:var(--muted);">' + esc(p.name) + ' $' + p.price + ' — collected $' + collectedOf(c) + ', pending $' + pendingOf(c) + '</div></div>' +
+        '<div style="font-size:12px;color:var(--muted);">' + esc(p.name) + ' $' + p.price + ' — collected $' + collectedOf(c) + ', pending $' + pendingOf(c) + (c.trackId ? ' • ID ' + esc(c.trackId) : '') + '</div></div>' +
         '<span class="status-pill st-' + c.stage + '" onclick="cycleStage(' + c.id + ')">' + STAGE_LABEL[c.stage] + '</span></div>' +
         '<div style="margin-top:8px;"><button class="btn btn-outline btn-small" onclick="editClient(' + c.id + ')">Edit</button>' +
         '<button class="btn btn-danger btn-small" onclick="deleteClient(' + c.id + ')">Delete</button></div></div>';
@@ -918,8 +1184,8 @@ function exportData(store, fmt) {
   const rows = store === 'clients' ? clients : leads;
   if (!rows.length) { toast('Nothing to export yet'); return; }
   if (fmt === 'json') download('s7-' + store + '.json', JSON.stringify(rows, null, 2), 'application/json');
-  else if (store === 'clients') download('s7-clients.csv', toCsv(rows, ['id', 'name', 'owner', 'email', 'phone', 'city', 'plan', 'stage', 'createdAt']), 'text/csv');
-  else download('s7-leads.csv', toCsv(rows, ['id', 'division', 'leadType', 'biz', 'owner', 'phone', 'city', 'plan', 'address', 'timeline', 'msg', 'status', 'createdAt']), 'text/csv');
+  else if (store === 'clients') download('s7-clients.csv', toCsv(rows, ['id', 'trackId', 'name', 'owner', 'email', 'phone', 'city', 'plan', 'stage', 'createdAt']), 'text/csv');
+  else download('s7-leads.csv', toCsv(rows, ['id', 'trackId', 'division', 'leadType', 'biz', 'owner', 'phone', 'city', 'plan', 'address', 'timeline', 'msg', 'status', 'createdAt']), 'text/csv');
   toast('Export downloaded');
 }
 
@@ -961,6 +1227,9 @@ if ('serviceWorker' in navigator) { window.addEventListener('load', function() {
 /* ---------- init ---------- */
 setupPWA();
 renderCatalog();
+ensureTrackIds();
+setupScrollSpy();
+renderDrawerContact();
 saveRender();
 renderLeads();
 updateTemplates();
