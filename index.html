@@ -238,7 +238,6 @@ nav button { min-height:44px; }
 <div id="view-hq" class="view">
   <div class="container">
     <div class="card" style="text-align:center;padding:18px 16px;">
-      <canvas id="globeCanvas" width="300" height="190" style="width:100%;max-width:340px;height:auto;display:block;margin:0 auto;"></canvas>
       <div style="font-weight:800;font-size:19px;letter-spacing:0.5px;margin-top:6px;">S7 GLOBAL <span style="color:var(--cyan);">HQ</span> — OWNER ONLY</div>
       <div style="color:var(--muted);font-size:12px;">LOCAL SHOPS EVERYWHERE • LIVE LEAD TRACKING</div>
       <div id="markerLine" style="color:var(--lime);font-size:12px;font-weight:700;margin-top:6px;">0 CLIENT MARKERS LIVE</div>
@@ -250,20 +249,10 @@ nav button { min-height:44px; }
       <div class="stat-box"><div class="stat-val" id="statClients">0</div><div class="stat-lbl">Clients</div></div>
     </div>
 
-    <div class="card">
-      <h2>🏆 $1,000 SPRINT LEADERBOARD</h2>
-      <div style="background:#060B14;border:1px solid var(--border);border-radius:999px;height:16px;overflow:hidden;margin-bottom:8px;">
-        <div id="sprintBar" style="height:100%;width:0%;background:linear-gradient(90deg,var(--cyan),var(--lime));transition:width 0.5s;"></div>
-      </div>
-      <div id="sprintText" style="font-size:13px;color:var(--muted);margin-bottom:10px;">$0 of $1,000 collected</div>
-      <div id="leaderList"></div>
-    </div>
-
     <div class="hq-tabs">
       <button id="hqtab-clients" class="active" onclick="hqTab('clients')">Clients</button>
       <button id="hqtab-leads" onclick="hqTab('leads')">Leads</button>
       <button id="hqtab-scripts" onclick="hqTab('scripts')">Scripts</button>
-      <button id="hqtab-web" onclick="hqTab('web')">Web Builder</button>
       <button id="hqtab-muse" onclick="hqTab('muse')">Muse AI</button>
       <button id="hqtab-data" onclick="hqTab('data')">Data</button>
       <button id="hqtab-settings" onclick="hqTab('settings')">Settings</button>
@@ -330,22 +319,6 @@ nav button { min-height:44px; }
       </div>
     </div>
 
-    <!-- HQ: WEB BUILDER -->
-    <div id="tab-web" class="tab-view">
-      <div class="card">
-        <h2>Instant Client Landing Page Builder</h2>
-        <input type="text" id="wName" placeholder="Shop Name" />
-        <input type="text" id="wCity" placeholder="City / Neighborhood (e.g., East Point, GA)" />
-        <input type="text" id="wPhone" placeholder="Phone Number" />
-        <input type="text" id="wAddr" placeholder="Street Address" />
-        <input type="text" id="wHours" placeholder="Hours (e.g., Mon-Sat 9am-7pm)" />
-        <input type="text" id="wServices" placeholder="Top 3 Services (comma separated)" />
-        <button class="btn btn-cyan" onclick="buildSite()">Generate Client index.html</button>
-        <pre id="siteOutput">Fill details above and tap Generate...</pre>
-        <button class="btn btn-lime" onclick="copyText('siteOutput')">Copy Client HTML</button>
-      </div>
-    </div>
-
     <!-- HQ: MUSE -->
     <div id="tab-muse" class="tab-view">
       <div class="card">
@@ -382,11 +355,12 @@ nav button { min-height:44px; }
     <div id="tab-settings" class="tab-view">
       <div class="card">
         <h2>⚙️ Brand Settings — Owner Only</h2>
-        <p class="small" style="margin-bottom:10px;">Saved on this device only (localStorage: s7_brand_settings). These never appear as a prompt to public visitors. A Pay Deposit button shows on the public page ONLY if a Maps payment link is saved here.</p>
+        <p class="small" style="margin-bottom:10px;">Saved on this device only (localStorage: s7_brand_settings). These never appear as a prompt to public visitors. The public Pay Deposit button uses the built-in default Maps payment link unless you save an override below.</p>
         <label class="fld" for="setPhone">Business Phone (reference)</label>
         <input type="tel" id="setPhone" placeholder="470-494-5855 (TEXT ONLY)" />
-        <label class="fld" for="setMapPay">Maps Deposit Payment Link (optional)</label>
-        <input type="url" id="setMapPay" placeholder="https://… (leave blank = no Pay button shown)" />
+        <label class="fld" for="setMapPay">Maps Deposit Payment Link — Override (optional)</label>
+        <input type="url" id="setMapPay" placeholder="Leave blank to use the built-in default link" />
+        <p class="small" style="margin-bottom:10px;">Built-in default (live now): <strong>https://buy.stripe.com/5kQ3cxdB72uPgSXb1zcEw10</strong> — "S7 Maps — Full Setup Deposit", $125 one-time. Paste a different link above only to override it; clear the field and save to go back to the default.</p>
         <label class="fld" for="setRePay">Real Estate Link (optional)</label>
         <input type="url" id="setRePay" placeholder="https://… (stored for owner reference)" />
         <label class="fld" for="setWebhook">Lead Alert Webhook URL (optional)</label>
@@ -452,9 +426,10 @@ nav button { min-height:44px; }
 
 <script>
 /* ============================================================
-   S7 GLOBAL HQ — V6 (owner playbook: Maps fulfillment checklist + live-proof
-   gate, one-tap welcome text, RE deal fields, lead-alert webhook hook.
-   Builds on V5 — menu drawer, scroll-spy, real order tracking, no demo data)
+   S7 GLOBAL HQ — V6.2 (default Stripe pay link hardcoded + non-Maps/RE app
+   content removed. Builds on V6 — owner playbook: Maps fulfillment checklist
+   + live-proof gate, one-tap welcome text, RE deal fields, lead-alert webhook
+   hook. Builds on V5 — menu drawer, scroll-spy, real order tracking, no demo data)
    1) CATALOG: single source of truth for plans/services/steps/FAQs.
       All buyer-facing pricing, checklists, comparisons and steps
       are RENDERED from this object — never hard-code prices in HTML.
@@ -566,8 +541,11 @@ const firebaseEnabled = Boolean(FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.projec
 
 
 /* ---------- brand settings (OWNER ONLY, localStorage s7_brand_settings) ----------
-   Public visitors never see a settings prompt. A public Pay button appears
-   ONLY when the owner has saved a Maps payment link here. */
+   Public visitors never see a settings prompt. V6.2: a built-in DEFAULT Maps
+   payment link (real Stripe link, created by the owner) is hardcoded below, so
+   the public Pay button shows out of the box. An owner-saved mapPayLink in
+   Settings OVERRIDES the default; clearing the field falls back to the default. */
+const DEFAULT_MAP_PAY_LINK = 'https://buy.stripe.com/5kQ3cxdB72uPgSXb1zcEw10';
 const SETTINGS_KEY = 's7_brand_settings';
 function loadSettings() {
   try { const v = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}'); return (v && typeof v === 'object' && !Array.isArray(v)) ? v : {}; }
@@ -575,13 +553,17 @@ function loadSettings() {
 }
 let brandSettings = loadSettings();
 function persistSettings() { try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(brandSettings)); } catch (e) {} }
+/* The pay link actually used everywhere: owner-saved override wins,
+   otherwise the built-in default. Never empty — Pay no longer hides. */
+function effectiveMapPayLink() {
+  const saved = String(brandSettings.mapPayLink || '').trim();
+  return /^https?:\/\//i.test(saved) ? saved : DEFAULT_MAP_PAY_LINK;
+}
 function renderSettingsPublic() {
   const slot = document.getElementById('buyerPaySlot');
   if (slot) {
-    const link = String(brandSettings.mapPayLink || '').trim();
-    slot.innerHTML = /^https?:\/\//i.test(link)
-      ? '<a class="btn btn-lime" href="' + esc(link) + '" target="_blank" rel="noopener">Pay Maps Deposit ($125)</a>'
-      : '';
+    const link = effectiveMapPayLink();
+    slot.innerHTML = '<a class="btn btn-lime" href="' + esc(link) + '" target="_blank" rel="noopener">Pay Maps Deposit ($125)</a>';
   }
   const sf = document.getElementById('setPhone'); if (sf) sf.value = brandSettings.phone || '';
   const sm = document.getElementById('setMapPay'); if (sm) sm.value = brandSettings.mapPayLink || '';
@@ -618,8 +600,8 @@ function fireLeadWebhook(lead) {
 
 /* ---------- V6: speed-to-lead welcome text (OWNER HQ, one tap) ----------
    Builds an sms: link addressed to the LEAD/CLIENT's own phone with the
-   welcome message + their tracking ID. A payment URL is included ONLY if
-   the owner has saved a real Maps payment link in Settings. */
+   welcome message + their tracking ID. V6.2: the payment URL is the effective
+   Maps pay link (owner override, else the built-in default Stripe link). */
 function welcomeHref(rec, isRE) {
   const phone = digitsOf(rec && rec.phone ? rec.phone : '');
   if (!phone) return '';
@@ -628,7 +610,7 @@ function welcomeHref(rec, isRE) {
   let next = "Reply here and we'll get you started.";
   if (!isRE) {
     const p = planOf(rec.plan || 'full');
-    const link = String(brandSettings.mapPayLink || '').trim();
+    const link = effectiveMapPayLink();
     if (p.deposit > 0 && /^https?:\/\//i.test(link)) next = 'Your $' + p.deposit + ' deposit link to kick off Step 1: ' + link;
     else if (p.deposit > 0) next = 'Your $' + p.deposit + ' deposit link comes next to kick off Step 1.';
   }
@@ -1233,18 +1215,7 @@ function saveRender() {
   document.getElementById('statCollected').innerText = '$' + collected;
   document.getElementById('statPending').innerText = '$' + pending;
   document.getElementById('statClients').innerText = clients.length;
-  renderSprint();
-}
-function renderSprint() {
-  const total = clients.reduce(function(a, c) { return a + collectedOf(c); }, 0);
-  const pct = Math.min(100, Math.round(total / 1000 * 100));
-  document.getElementById('sprintBar').style.width = pct + '%';
-  document.getElementById('sprintText').innerText = '$' + total + ' of $1,000 collected • ' + pct + '%';
   document.getElementById('markerLine').innerText = clients.length + (clients.length === 1 ? ' CLIENT MARKER LIVE' : ' CLIENT MARKERS LIVE');
-  const sorted = clients.slice().sort(function(a, b) { return collectedOf(b) - collectedOf(a); });
-  document.getElementById('leaderList').innerHTML = sorted.length ? sorted.map(function(c, i) {
-    return '<div class="client-item" style="display:flex;justify-content:space-between;align-items:center;"><div><strong>' + (i + 1) + '. ' + esc(c.name) + '</strong><div style="color:var(--muted);font-size:12px;">' + esc(c.city) + '</div></div><div style="font-weight:800;color:' + (c.stage === 'live' ? 'var(--lime)' : 'var(--cyan)') + ';">$' + collectedOf(c) + '</div></div>';
-  }).join('') : '<div style="color:var(--muted);font-size:13px;">No clients yet — your first deposit puts you on the board.</div>';
 }
 
 /* ---------- scripts & receipt (rendered from CATALOG plans) ---------- */
@@ -1259,19 +1230,6 @@ function updateTemplates() {
     'S7 GLOBAL LLC — RECEIPT & AGREEMENT\nClient: ' + biz + ' (' + owner + ')\nProvider: S7 Global LLC (Marquez Spencer | marquezspencervip@gmail.com | 470-494-5855 TEXT ONLY)\nPackage: ' + p.name + ' — ' + p.includes.join('; ') + ' ($' + p.price + '.00 Flat)\n' +
     (p.deposit ? 'Deposit Paid Today: $' + p.deposit + '.00 [RECEIVED]\nBalance Due Only When Live: $' + p.balance + '.00' : 'Due Today: $0.00\nBalance Due Only When Live: $' + p.balance + '.00') +
     '\nOwnership: Client keeps 100% ownership; S7 Global LLC is manager only.\nThank you for choosing S7 Global LLC!';
-}
-
-/* ---------- web builder (all user input escaped) ---------- */
-function buildSite() {
-  const name = document.getElementById('wName').value.trim() || 'Local Shop ATL';
-  const city = document.getElementById('wCity').value.trim() || 'East Point, GA';
-  const phone = document.getElementById('wPhone').value.trim() || '(470) 555-0100';
-  const cleanPhone = phone.replace(/\D/g, '');
-  const addr = document.getElementById('wAddr').value.trim() || 'Atlanta, GA';
-  const hours = document.getElementById('wHours').value.trim() || 'Mon–Sat: 9:00 AM – 7:00 PM';
-  const svcs = (document.getElementById('wServices').value.trim() || 'Walk-Ins, Appointments, Local Service').split(',').map(function(s) { return '<li style="padding:8px 0;border-bottom:1px solid #eee;"><strong>' + esc(s.trim()) + '</strong></li>'; }).join('');
-  document.getElementById('siteOutput').innerText = '<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' + esc(name) + ' | ' + esc(city) + '</title></head><body style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:16px;background:#f8fafc;color:#0f172a;"><div style="background:#060B14;color:#fff;padding:28px 20px;border-radius:14px;text-align:center;"><div style="color:#00E5FF;font-size:12px;font-weight:700;text-transform:uppercase;">Serving ' + esc(city) + '</div><h1 style="margin:8px 0;">' + esc(name) + '</h1><a href="tel:' + cleanPhone + '" style="display:block;background:#00E5FF;color:#060B14;padding:14px;border-radius:10px;text-decoration:none;font-weight:800;margin-top:14px;">Call Now: ' + esc(phone) + '</a></div><div style="background:#fff;padding:18px;border-radius:12px;margin-top:14px;"><h2>Our Services</h2><ul style="list-style:none;padding:0;">' + svcs + '</ul></div><div style="background:#fff;padding:18px;border-radius:12px;margin-top:14px;"><h2>Location &amp; Hours</h2><p><strong>Address:</strong> ' + esc(addr) + '</p><p><strong>Hours:</strong> ' + esc(hours) + '</p></div><footer style="text-align:center;font-size:12px;color:#64748b;margin-top:20px;">&copy; 2026 ' + esc(name) + ' • Setup by S7 Global LLC</footer></body></html>';
-  toast('Client site generated');
 }
 
 /* ---------- export ---------- */
@@ -1289,39 +1247,6 @@ function exportData(store, fmt) {
   toast('Export downloaded');
 }
 
-/* ---------- animated globe (HQ) ---------- */
-(function() {
-  var cv = document.getElementById('globeCanvas'); if (!cv) return;
-  var ctx = cv.getContext('2d'); var W = cv.width, H = cv.height, cx = W / 2, cy = H / 2, R = 82;
-  var pts = [];
-  for (var i = 0; i < 220; i++) { var th = Math.acos(2 * Math.random() - 1), ph = Math.random() * Math.PI * 2; pts.push({ th: th, ph: ph }); }
-  var ang = 0;
-  function hashNum(str) { var h = 0; for (var i = 0; i < str.length; i++) { h = (h * 31 + str.charCodeAt(i)) % 9973; } return h / 9973; }
-  function frame() {
-    ctx.clearRect(0, 0, W, H);
-    ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.strokeStyle = 'rgba(0,229,255,0.35)'; ctx.lineWidth = 1; ctx.stroke();
-    ang += 0.006;
-    pts.forEach(function(p) {
-      var ph = p.ph + ang;
-      var x = R * Math.sin(p.th) * Math.cos(ph), y = R * Math.cos(p.th) * 0.92, z = R * Math.sin(p.th) * Math.sin(ph);
-      if (z < -R * 0.4) return;
-      ctx.beginPath(); ctx.arc(cx + x, cy + y, z > 0 ? 1.7 : 1.1, 0, Math.PI * 2);
-      ctx.fillStyle = z > 0 ? 'rgba(0,229,255,0.9)' : 'rgba(0,229,255,0.35)'; ctx.fill();
-    });
-    clients.forEach(function(c, i) {
-      var seed = hashNum(c.name + i);
-      var ph = seed * Math.PI * 2 + ang * 1.4;
-      var th = 0.7 + seed * 1.6;
-      var x = R * Math.sin(th) * Math.cos(ph), y = R * Math.cos(th) * 0.92, z = R * Math.sin(th) * Math.sin(ph);
-      if (z < 0) return;
-      var pulse = 3 + Math.sin(Date.now() / 300 + i) * 1.4;
-      ctx.beginPath(); ctx.arc(cx + x, cy + y, pulse + 3, 0, Math.PI * 2); ctx.fillStyle = 'rgba(132,204,22,0.25)'; ctx.fill();
-      ctx.beginPath(); ctx.arc(cx + x, cy + y, 2.6, 0, Math.PI * 2); ctx.fillStyle = '#84CC16'; ctx.fill();
-    });
-    requestAnimationFrame(frame);
-  }
-  frame();
-})();
 if ('serviceWorker' in navigator) { window.addEventListener('load', function() { navigator.serviceWorker.register('sw.js').catch(function() {}); }); }
 
 /* ---------- init ---------- */
