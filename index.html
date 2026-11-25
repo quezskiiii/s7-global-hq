@@ -193,6 +193,16 @@ nav button { min-height:44px; }
         <input type="text" id="leadAddr" placeholder="Street address, city, ZIP" />
         <label class="fld" for="leadTimeline">Timeline (optional)</label>
         <input type="text" id="leadTimeline" placeholder="e.g., ASAP, 30 days, just exploring" />
+        <label class="fld" for="leadAsk">Asking Price (optional)</label>
+        <input type="text" id="leadAsk" placeholder="e.g., $185,000 or best offer" />
+        <label class="fld" for="leadRepairs">Estimated Repairs (optional)</label>
+        <select id="leadRepairs">
+          <option value="Not sure">Not sure</option>
+          <option value="None">None — move-in ready</option>
+          <option value="Light">Light — paint / minor fixes</option>
+          <option value="Moderate">Moderate — kitchen / bath / systems work</option>
+          <option value="Heavy">Heavy — major rehab</option>
+        </select>
       </div>
       <label class="fld" for="leadMsg">Anything we should know? (optional)</label>
       <textarea id="leadMsg" rows="2" placeholder="Business details — or property condition / situation for real estate..."></textarea>
@@ -379,6 +389,9 @@ nav button { min-height:44px; }
         <input type="url" id="setMapPay" placeholder="https://… (leave blank = no Pay button shown)" />
         <label class="fld" for="setRePay">Real Estate Link (optional)</label>
         <input type="url" id="setRePay" placeholder="https://… (stored for owner reference)" />
+        <label class="fld" for="setWebhook">Lead Alert Webhook URL (optional)</label>
+        <input type="url" id="setWebhook" placeholder="https://formspree.io/f/… (leave blank = no alert sent)" />
+        <p class="small" style="margin-bottom:10px;">Free option: create a Formspree form endpoint (formspree.io) and paste its URL here to get lead alerts by email. When set, each new public request also POSTs a copy (tracking ID, division, name, phone, plan) to that URL. Blank = nothing is sent anywhere.</p>
         <button class="btn btn-lime" onclick="saveBrandSettings()">Save Settings to This Device</button>
       </div>
     </div>
@@ -439,7 +452,9 @@ nav button { min-height:44px; }
 
 <script>
 /* ============================================================
-   S7 GLOBAL HQ — V5 (menu drawer, scroll-spy, real order tracking — no demo data)
+   S7 GLOBAL HQ — V6 (owner playbook: Maps fulfillment checklist + live-proof
+   gate, one-tap welcome text, RE deal fields, lead-alert webhook hook.
+   Builds on V5 — menu drawer, scroll-spy, real order tracking, no demo data)
    1) CATALOG: single source of truth for plans/services/steps/FAQs.
       All buyer-facing pricing, checklists, comparisons and steps
       are RENDERED from this object — never hard-code prices in HTML.
@@ -571,15 +586,59 @@ function renderSettingsPublic() {
   const sf = document.getElementById('setPhone'); if (sf) sf.value = brandSettings.phone || '';
   const sm = document.getElementById('setMapPay'); if (sm) sm.value = brandSettings.mapPayLink || '';
   const sr = document.getElementById('setRePay'); if (sr) sr.value = brandSettings.rePayLink || '';
+  const sw = document.getElementById('setWebhook'); if (sw) sw.value = brandSettings.leadWebhookUrl || '';
 }
 function saveBrandSettings() {
   brandSettings = {
     phone: document.getElementById('setPhone').value.trim(),
     mapPayLink: document.getElementById('setMapPay').value.trim(),
-    rePayLink: document.getElementById('setRePay').value.trim()
+    rePayLink: document.getElementById('setRePay').value.trim(),
+    leadWebhookUrl: document.getElementById('setWebhook').value.trim()
   };
   persistSettings(); renderSettingsPublic();
   toast('Settings saved on this device');
+}
+
+/* ---------- V6: lead-alert webhook (OWNER-OPTIONAL, best-effort) ----------
+   Fires ONLY when the owner has saved a webhook URL in Settings. A failed
+   webhook must NEVER block or error the public submit flow. */
+function fireLeadWebhook(lead) {
+  try {
+    const url = String(brandSettings.leadWebhookUrl || '').trim();
+    if (!/^https?:\/\//i.test(url)) return;
+    const payload = {
+      trackId: lead.trackId || '', division: lead.division || '', name: lead.biz || lead.name || '',
+      phone: lead.phone || '', plan: lead.plan || '', leadType: lead.leadType || '',
+      submittedAt: lead.createdAt || new Date().toISOString(), source: 'S7 Global HQ app'
+    };
+    const p = fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: JSON.stringify(payload) });
+    if (p && typeof p.catch === 'function') p.catch(function() {});
+  } catch (e) { /* best-effort only — never break submit */ }
+}
+
+/* ---------- V6: speed-to-lead welcome text (OWNER HQ, one tap) ----------
+   Builds an sms: link addressed to the LEAD/CLIENT's own phone with the
+   welcome message + their tracking ID. A payment URL is included ONLY if
+   the owner has saved a real Maps payment link in Settings. */
+function welcomeHref(rec, isRE) {
+  const phone = digitsOf(rec && rec.phone ? rec.phone : '');
+  if (!phone) return '';
+  const name = rec.owner || rec.biz || rec.name || 'there';
+  const what = isRE ? 'Real Estate' : planOf(rec.plan || 'full').name;
+  let next = "Reply here and we'll get you started.";
+  if (!isRE) {
+    const p = planOf(rec.plan || 'full');
+    const link = String(brandSettings.mapPayLink || '').trim();
+    if (p.deposit > 0 && /^https?:\/\//i.test(link)) next = 'Your $' + p.deposit + ' deposit link to kick off Step 1: ' + link;
+    else if (p.deposit > 0) next = 'Your $' + p.deposit + ' deposit link comes next to kick off Step 1.';
+  }
+  const body = 'Hi ' + name + ', this is S7 Global LLC \u2014 got your request for ' + what + '. Your tracking ID is ' + (rec.trackId || '') + '. ' + next;
+  return 'sms:' + phone + '?&body=' + encodeURIComponent(body);
+}
+function welcomeBtnHTML(rec, isRE) {
+  const href = welcomeHref(rec, isRE);
+  if (href) return '<a class="btn btn-cyan btn-small" href="' + href + '">\uD83D\uDCAC Welcome Text</a>';
+  return '<button class="btn btn-outline btn-small" disabled title="No phone number on this record">\uD83D\uDCAC Welcome Text</button>';
 }
 
 /* ---------- PWA: data-URI manifest + install prompt ---------- */
@@ -977,17 +1036,20 @@ function submitLead() {
     const leadType = document.getElementById('leadType').value;
     const address = document.getElementById('leadAddr').value.trim();
     const timeline = document.getElementById('leadTimeline').value.trim();
-    lead = { id: Date.now(), trackId: genTrackId(), division: 'real-estate', leadType: leadType, biz: biz, owner: owner, phone: phone, city: city, plan: '', address: address, timeline: timeline, msg: msg, status: 'new', createdAt: new Date().toISOString() };
-    body = 'REAL ESTATE \u2014 New ' + leadType + ' request: ' + biz + (owner ? ' (' + owner + ')' : '') + ', Phone: ' + phone + (address ? ', Property: ' + address : '') + (city ? ', Area: ' + city : '') + (timeline ? ', Timeline: ' + timeline : '') + (msg ? ', Details: ' + msg : '');
+    const askingPrice = document.getElementById('leadAsk').value.trim();
+    const repairLevel = document.getElementById('leadRepairs').value;
+    lead = { id: Date.now(), trackId: genTrackId(), division: 'real-estate', leadType: leadType, biz: biz, owner: owner, phone: phone, city: city, plan: '', address: address, timeline: timeline, askingPrice: askingPrice, repairLevel: repairLevel, msg: msg, status: 'new', createdAt: new Date().toISOString() };
+    body = 'REAL ESTATE \u2014 New ' + leadType + ' request: ' + biz + (owner ? ' (' + owner + ')' : '') + ', Phone: ' + phone + (address ? ', Property: ' + address : '') + (city ? ', Area: ' + city : '') + (timeline ? ', Timeline: ' + timeline : '') + (askingPrice ? ', Asking: ' + askingPrice : '') + (repairLevel ? ', Repairs: ' + repairLevel : '') + (msg ? ', Details: ' + msg : '');
     subject = 'Real Estate Request \u2014 ' + biz;
   } else {
     const plan = document.getElementById('leadPlan').value;
     const p = planOf(plan);
-    lead = { id: Date.now(), trackId: genTrackId(), division: 'maps', leadType: '', biz: biz, owner: owner, phone: phone, city: city, plan: plan, address: '', timeline: '', msg: msg, status: 'new', createdAt: new Date().toISOString() };
+    lead = { id: Date.now(), trackId: genTrackId(), division: 'maps', leadType: '', biz: biz, owner: owner, phone: phone, city: city, plan: plan, address: '', timeline: '', askingPrice: '', repairLevel: '', msg: msg, status: 'new', createdAt: new Date().toISOString() };
     body = 'MAPS \u2014 New request: ' + biz + (owner ? ' (' + owner + ')' : '') + ', ' + (city || 'Metro Atlanta') + ', Phone: ' + phone + ', Plan: ' + p.name + ' $' + p.price + (msg ? ', Note: ' + msg : '');
     subject = 'MAPS Setup Request \u2014 ' + biz;
   }
   leads.unshift(lead); saveStore('s7_leads', leads); renderLeads();
+  fireLeadWebhook(lead);
   const box = document.getElementById('leadConfirm');
   box.style.display = 'block';
   box.innerHTML = '<div style="background:rgba(132,204,22,.12);border:1px solid var(--lime);border-radius:10px;padding:12px;margin-top:6px;">' +
@@ -1010,12 +1072,13 @@ function renderLeads() {
   list.innerHTML = shown.map(function(l) {
     const isRE = (l.division || 'maps') === 'real-estate';
     const detail = isRE
-      ? esc(l.leadType || 'Seller') + ' \u2022 Real Estate' + (l.address ? ' \u2022 ' + esc(l.address) : '') + (l.timeline ? ' \u2022 ' + esc(l.timeline) : '')
+      ? esc(l.leadType || 'Seller') + ' \u2022 Real Estate' + (l.address ? ' \u2022 ' + esc(l.address) : '') + (l.timeline ? ' \u2022 ' + esc(l.timeline) : '') + (l.askingPrice ? ' \u2022 Asking ' + esc(l.askingPrice) : '') + (l.repairLevel ? ' \u2022 Repairs: ' + esc(l.repairLevel) : '')
       : esc(planOf(l.plan).name) + ' $' + planOf(l.plan).price + ' \u2022 Maps';
     return '<div class="client-item"><div style="font-weight:700;font-size:14px;">' + esc(l.biz) + '</div>' +
       '<div style="font-size:12px;color:var(--muted);">' + esc(l.owner || 'Name n/a') + ' \u2022 ' + esc(l.city || 'City n/a') + ' \u2022 ' + esc(l.phone) + '</div>' +
       '<div style="font-size:12px;color:var(--muted);">' + detail + ' \u2022 ' + esc((l.createdAt || '').slice(0, 10)) + (l.trackId ? ' \u2022 ID ' + esc(l.trackId) : '') + (l.msg ? ' \u2022 ' + esc(l.msg) : '') + '</div>' +
       '<div style="margin-top:8px;">' + (isRE ? '' : '<button class="btn btn-lime btn-small" onclick="leadToClient(' + l.id + ')">Convert to Client</button>') +
+      welcomeBtnHTML(l, isRE) +
       '<button class="btn btn-danger btn-small" onclick="deleteLead(' + l.id + ')">Delete</button></div></div>';
   }).join('');
 }
@@ -1028,19 +1091,46 @@ function leadToClient(id) {
   const l = leads.find(function(x) { return x.id === id; });
   if (!l) return;
   if ((l.division || 'maps') === 'real-estate') { toast('Real Estate leads stay in Leads \u2014 clients are Maps only'); return; }
-  clients.unshift({ id: Date.now(), trackId: l.trackId || genTrackId(), name: l.biz, owner: l.owner || '', email: '', phone: l.phone || '', city: l.city || 'Atlanta, GA', plan: l.plan || 'full', stage: 'deposit', createdAt: new Date().toISOString() });
+  clients.unshift({ id: Date.now(), trackId: l.trackId || genTrackId(), name: l.biz, owner: l.owner || '', email: '', phone: l.phone || '', city: l.city || 'Atlanta, GA', plan: l.plan || 'full', stage: 'deposit', fulfill: defaultFulfill(), createdAt: new Date().toISOString() });
   leads = leads.filter(function(x) { return x.id !== id; });
   saveStore('s7_leads', leads); saveRender(); renderLeads();
   hqTab('clients'); toast('Lead converted to client');
 }
 
 /* ---------- clients DB (HQ pipeline, key s7_clients — legacy compatible) ---------- */
+/* ---------- V6: Maps fulfillment checklist (stored on each client record) ----------
+   The live-proof item is a GATE: while a balance is outstanding and proof
+   has not been sent, the client card shows a warning — send live proof
+   before requesting the final payment. */
+const FULFILL_ITEMS = [
+  { key: 'nameMatch', label: 'Exact business name confirmed (matches storefront signage)' },
+  { key: 'address', label: 'Physical address confirmed (or service-area ZIPs for mobile businesses)' },
+  { key: 'media', label: 'Storefront video/photos received (sign/door logo + unlocked interior)' },
+  { key: 'details', label: 'Hours, phone & 3-5 services collected' },
+  { key: 'proofSent', label: 'Live proof sent to client (screenshot or live Maps link)' }
+];
+function defaultFulfill() { return { nameMatch: false, address: false, media: false, details: false, proofSent: false }; }
+function normalizeFulfill(f) {
+  const d = defaultFulfill();
+  if (f && typeof f === 'object') FULFILL_ITEMS.forEach(function(it) { d[it.key] = Boolean(f[it.key]); });
+  return d;
+}
+function toggleFulfill(id, key) {
+  clients = clients.map(function(c) {
+    if (c.id !== id) return c;
+    const f = normalizeFulfill(c.fulfill); f[key] = !f[key];
+    return Object.assign({}, c, { fulfill: f });
+  });
+  saveRender();
+}
 function normalizeClient(c) {
   const stage = c.stage || (c.status === 'live' ? 'live' : 'deposit');
   return {
     id: c.id || Date.now(), name: c.name || 'Unnamed', owner: c.owner || '', email: c.email || '',
     phone: c.phone || '', city: c.city || 'Atlanta, GA', plan: c.plan || 'full',
     stage: ['deposit', 'setup', 'live'].indexOf(stage) >= 0 ? stage : 'deposit',
+    trackId: c.trackId || '',
+    fulfill: normalizeFulfill(c.fulfill),
     createdAt: c.createdAt || ''
   };
 }
@@ -1067,7 +1157,7 @@ function addClient() {
     });
     toast('Client updated');
   } else {
-    clients.unshift({ id: Date.now(), name: name, owner: owner, email: email, phone: phone, city: city, plan: plan, stage: stage, createdAt: new Date().toISOString() });
+    clients.unshift({ id: Date.now(), trackId: genTrackId(), name: name, owner: owner, email: email, phone: phone, city: city, plan: plan, stage: stage, fulfill: defaultFulfill(), createdAt: new Date().toISOString() });
     toast('Client added');
   }
   cancelEdit(); saveRender();
@@ -1118,13 +1208,23 @@ function saveRender() {
   } else {
     list.innerHTML = clients.map(function(c) {
       const p = planOf(c.plan);
+      const f = normalizeFulfill(c.fulfill);
+      const bal = pendingOf(c);
+      let extra = '<div style="margin-top:10px;border-top:1px solid rgba(148,163,184,.25);padding-top:8px;"><div style="font-size:12px;font-weight:800;color:var(--cyan);letter-spacing:.5px;">\u2705 FULFILLMENT CHECKLIST</div>' +
+        FULFILL_ITEMS.map(function(it) {
+          return '<label style="display:flex;gap:8px;align-items:flex-start;font-size:12px;margin-top:6px;cursor:pointer;"><input type="checkbox" style="margin-top:2px;" ' + (f[it.key] ? 'checked ' : '') + 'onchange="toggleFulfill(' + c.id + ', \'' + it.key + '\')" /><span>' + esc(it.label) + '</span></label>';
+        }).join('') + '</div>';
+      if (bal > 0 && !f.proofSent) {
+        extra += '<div style="margin-top:8px;background:rgba(248,113,113,.12);border:1px solid var(--danger);border-radius:8px;padding:8px 10px;font-size:12px;font-weight:700;color:var(--danger);">\u26A0\uFE0F Send live proof before requesting the final $' + bal + ' \u2014 screenshot or live Maps link first.</div>';
+      }
       return '<div class="client-item"><div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start;">' +
         '<div><div style="font-weight:700;font-size:14px;">' + esc(c.name) + '</div>' +
         '<div style="font-size:12px;color:var(--muted);">' + esc(c.city) + ' • ' + esc(c.phone || 'No phone') + (c.owner ? ' • ' + esc(c.owner) : '') + (c.email ? ' • ' + esc(c.email) : '') + '</div>' +
         '<div style="font-size:12px;color:var(--muted);">' + esc(p.name) + ' $' + p.price + ' — collected $' + collectedOf(c) + ', pending $' + pendingOf(c) + (c.trackId ? ' • ID ' + esc(c.trackId) : '') + '</div></div>' +
         '<span class="status-pill st-' + c.stage + '" onclick="cycleStage(' + c.id + ')">' + STAGE_LABEL[c.stage] + '</span></div>' +
         '<div style="margin-top:8px;"><button class="btn btn-outline btn-small" onclick="editClient(' + c.id + ')">Edit</button>' +
-        '<button class="btn btn-danger btn-small" onclick="deleteClient(' + c.id + ')">Delete</button></div></div>';
+        welcomeBtnHTML(c, false) +
+        '<button class="btn btn-danger btn-small" onclick="deleteClient(' + c.id + ')">Delete</button></div>' + extra + '</div>';
     }).join('');
     // recompute totals cleanly (map above already added per item)
     collected = clients.reduce(function(a, c) { return a + collectedOf(c); }, 0);
@@ -1185,7 +1285,7 @@ function exportData(store, fmt) {
   if (!rows.length) { toast('Nothing to export yet'); return; }
   if (fmt === 'json') download('s7-' + store + '.json', JSON.stringify(rows, null, 2), 'application/json');
   else if (store === 'clients') download('s7-clients.csv', toCsv(rows, ['id', 'trackId', 'name', 'owner', 'email', 'phone', 'city', 'plan', 'stage', 'createdAt']), 'text/csv');
-  else download('s7-leads.csv', toCsv(rows, ['id', 'trackId', 'division', 'leadType', 'biz', 'owner', 'phone', 'city', 'plan', 'address', 'timeline', 'msg', 'status', 'createdAt']), 'text/csv');
+  else download('s7-leads.csv', toCsv(rows, ['id', 'trackId', 'division', 'leadType', 'biz', 'owner', 'phone', 'city', 'plan', 'address', 'timeline', 'askingPrice', 'repairLevel', 'msg', 'status', 'createdAt']), 'text/csv');
   toast('Export downloaded');
 }
 
