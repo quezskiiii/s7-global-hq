@@ -4,13 +4,14 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 <meta name="theme-color" content="#060B14" />
-<meta name="description" content="S7 Global LLC — get your Metro Atlanta shop found on Google Maps & Apple Maps. Full Setup $250 flat: $125 down, $125 only when live." />
-<link rel="manifest" href="manifest.webmanifest" />
+<meta name="description" content="S7 Global LLC — Maps & Real Estate. Get found on Google & Apple Maps ($250 flat Maps setup) or request a cash offer on a Metro Atlanta house as-is with S7 Global Real Estate." />
+<link id="pwaManifest" rel="manifest" href="manifest.webmanifest" />
 <link rel="icon" type="image/svg+xml" href="icon.svg" />
 <link rel="apple-touch-icon" href="icon.svg" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-title" content="S7 Global" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-<title>S7 Global LLC | Get Found on Google & Apple Maps — $250 Flat</title>
+<title>S7 Global LLC | Maps & Real Estate — Get Found on Google & Apple Maps</title>
 <style>
 :root { --bg: #060B14; --card: #0F172A; --border: #1E293B; --cyan: #00E5FF; --lime: #84CC16; --text: #F8FAFC; --muted: #94A3B8; --danger:#F87171; }
 * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
@@ -69,6 +70,13 @@ details.faq summary { font-weight:700; font-size:14px; cursor:pointer; }
 details.faq p { color:var(--muted); font-size:13px; line-height:1.5; margin-top:8px; }
 #toast { position:fixed; left:50%; transform:translateX(-50%); bottom:96px; background:var(--lime); color:#060B14; font-weight:700; font-size:13px; padding:10px 18px; border-radius:999px; display:none; z-index:99; box-shadow:0 4px 18px rgba(0,0,0,.5); }
 .small { font-size:12.5px; color:var(--muted); line-height:1.5; }
+
+.div-filters { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:14px; }
+.div-filters button { background:#060B14; border:1px solid var(--border); color:var(--muted); border-radius:999px; padding:8px 14px; font-size:12.5px; font-weight:700; cursor:pointer; }
+.div-filters button.active { color:#060B14; background:var(--lime); border-color:var(--lime); }
+header { flex-wrap:wrap; gap:8px; }
+.div-card { border:1px solid var(--border); border-radius:14px; padding:16px; margin-bottom:12px; background:#060B14; }
+.div-card h3 { font-size:16px; margin-bottom:4px; }
 </style>
 </head>
 <body>
@@ -77,7 +85,8 @@ details.faq p { color:var(--muted); font-size:13px; line-height:1.5; margin-top:
     <svg width="28" height="28" viewBox="0 0 60 60" fill="none"><rect x="2" y="2" width="56" height="56" rx="14" fill="#060B14" stroke="#00E5FF" stroke-width="3"/><text x="15" y="37" fill="#84CC16" font-family="sans-serif" font-weight="900" font-size="22">S7</text></svg>
     S7 GLOBAL LLC
   </div>
-  <span class="badge">$250 MAPS SETUP</span>
+  <span class="badge">MAPS • REAL ESTATE</span>
+  <button id="installBtn" class="btn btn-outline btn-small" style="margin:0;" onclick="triggerInstall()">⬇️ Install App</button>
 </header>
 
 <!-- ================= PUBLIC BUYER FRONT ================= -->
@@ -85,11 +94,13 @@ details.faq p { color:var(--muted); font-size:13px; line-height:1.5; margin-top:
   <div class="container">
     <div class="card hero">
       <div style="font-size:34px;">📍</div>
-      <h1>Your shop, <span>found on the map.</span></h1>
-      <p>S7 Global LLC sets up and verifies your business on <strong style="color:var(--text);">Google Search, Google Maps &amp; Apple Maps</strong> — with photos, hours, services, and a starter website — so nearby customers find you instead of your competitors.</p>
+      <h1>S7 Global LLC — <span>Maps &amp; Real Estate.</span></h1>
+      <p>Two ways we help Metro Atlanta: <strong style="color:var(--text);">📍 Maps</strong> — we set up and verify your shop on Google Search, Google Maps &amp; Apple Maps so nearby customers find you. <strong style="color:var(--text);">🏠 Real Estate</strong> — S7 Global Real Estate buys houses as-is and connects cash buyers with deals.</p>
       <a class="btn btn-lime" href="#get-started" onclick="goSection('get-started');return false;">Get Started — $125 Down</a>
       <a class="btn btn-outline" href="#plans" onclick="goSection('plans');return false;">See Plans &amp; Pricing</a>
+      <a class="btn btn-cyan" href="#real-estate" onclick="goSection('real-estate');return false;">🏠 Sell a House As-Is — Request a Cash Offer</a>
       <p class="small" style="margin:0;">Flat pricing. No monthly fee required. You keep 100% ownership of your listings — S7 Global is manager only.</p>
+      <p class="small" id="iosInstallHint" style="display:none;margin-top:10px;">📲 To install this app on iPhone: tap the Share button, then “Add to Home Screen.”</p>
     </div>
 
     <div class="card">
@@ -98,7 +109,14 @@ details.faq p { color:var(--muted); font-size:13px; line-height:1.5; margin-top:
       <p class="small">Timelines depend on Google's verification process — we handle the setup and verification steps with you, and your balance is only due when your listing is live.</p>
     </div>
 
-    <div class="card" id="plans">
+    <div class="card" id="divisions">
+      <h2>Our Divisions</h2>
+      <p class="small" style="margin-bottom:12px;">One company, two divisions — pick your path. Everything below is run by S7 Global LLC in Metro Atlanta.</p>
+      <div class="div-filters" id="divisionFilters"></div>
+      <div id="divisionCards"></div>
+    </div>
+
+    <div class="card division-section" data-division="maps" id="plans">
       <h2>Plans &amp; Pricing</h2>
       <div id="planCards"></div>
       <h2 style="margin-top:6px;">Compare Plans</h2>
@@ -106,7 +124,7 @@ details.faq p { color:var(--muted); font-size:13px; line-height:1.5; margin-top:
       <p class="small" style="margin-top:10px;">Refer a neighboring business and get a <strong style="color:var(--lime);">$25 credit</strong> when they sign up.</p>
     </div>
 
-    <div class="card">
+    <div class="card division-section" data-division="maps">
       <h2>What's Included</h2>
       <ul class="checklist" id="servicesList"></ul>
     </div>
@@ -119,20 +137,43 @@ details.faq p { color:var(--muted); font-size:13px; line-height:1.5; margin-top:
     <div class="card" id="get-started">
       <h2>Get Started</h2>
       <p class="small" style="margin-bottom:12px;">Tell us about your business. Submitting saves your request on this device — then tap <strong>Text</strong> or <strong>Email</strong> to send it to S7 Global so we can start.</p>
-      <label class="fld" for="leadBiz">Business Name *</label>
-      <input type="text" id="leadBiz" placeholder="e.g., East Point Cuts" />
+      <label class="fld" for="leadDivision">Division *</label>
+      <select id="leadDivision" onchange="onLeadDivisionChange()"></select>
+      <label class="fld" for="leadBiz">Your Name / Business Name *</label>
+      <input type="text" id="leadBiz" placeholder="e.g., East Point Cuts — or your name for a house sale" />
       <label class="fld" for="leadOwner">Your Name</label>
       <input type="text" id="leadOwner" placeholder="Owner name" />
       <label class="fld" for="leadPhone">Phone *</label>
       <input type="tel" id="leadPhone" placeholder="e.g., 470-555-0199" />
       <label class="fld" for="leadCity">City / Neighborhood</label>
       <input type="text" id="leadCity" placeholder="e.g., East Point, GA" />
-      <label class="fld" for="leadPlan">Plan</label>
-      <select id="leadPlan"></select>
+      <div id="leadMapsFields">
+        <label class="fld" for="leadPlan">Plan</label>
+        <select id="leadPlan"></select>
+      </div>
+      <div id="leadReFields" style="display:none;">
+        <label class="fld" for="leadType">I am a *</label>
+        <select id="leadType">
+          <option value="Seller">Seller — I want a cash offer on my house</option>
+          <option value="Buyer">Buyer — I buy houses / want deals</option>
+          <option value="Investor">Investor — add me to the VIP cash buyers list</option>
+        </select>
+        <label class="fld" for="leadAddr">Property Address</label>
+        <input type="text" id="leadAddr" placeholder="Street address, city, ZIP" />
+        <label class="fld" for="leadTimeline">Timeline (optional)</label>
+        <input type="text" id="leadTimeline" placeholder="e.g., ASAP, 30 days, just exploring" />
+      </div>
       <label class="fld" for="leadMsg">Anything we should know? (optional)</label>
-      <textarea id="leadMsg" rows="2" placeholder="Current website, hours, questions..."></textarea>
+      <textarea id="leadMsg" rows="2" placeholder="Business details — or property condition / situation for real estate..."></textarea>
       <button class="btn btn-lime" onclick="submitLead()">Save My Request</button>
       <div id="leadConfirm" style="display:none;"></div>
+    </div>
+
+    <div class="card division-section" data-division="real-estate" id="real-estate">
+      <h2>🏠 S7 Global Real Estate</h2>
+      <div id="reDetails"></div>
+      <a class="btn btn-cyan" href="https://www.facebook.com/profile.php?id=61596606044187" target="_blank" rel="noopener">S7 Global Real Estate on Facebook</a>
+      <button class="btn btn-lime" onclick="chooseDivision('real-estate')">Request a Cash Offer / Join the Buyers List</button>
     </div>
 
     <div class="card">
@@ -146,6 +187,7 @@ details.faq p { color:var(--muted); font-size:13px; line-height:1.5; margin-top:
       </p>
       <a class="btn btn-cyan" href="sms:+14704945855?&amp;body=MAPS">Text MAPS to 470-494-5855 (Text Only)</a>
       <a class="btn btn-outline" href="mailto:marquezspencervip@gmail.com?subject=MAPS%20Setup%20Request">Email for a Faster Response</a>
+      <div id="buyerPaySlot"></div>
     </div>
     <p class="small" style="text-align:center;">Business owner? This page is the public S7 Global offer. S7 Global staff: use the Owner HQ tab below.</p>
   </div>
@@ -183,6 +225,7 @@ details.faq p { color:var(--muted); font-size:13px; line-height:1.5; margin-top:
       <button id="hqtab-web" onclick="hqTab('web')">Web Builder</button>
       <button id="hqtab-muse" onclick="hqTab('muse')">Muse AI</button>
       <button id="hqtab-data" onclick="hqTab('data')">Data</button>
+      <button id="hqtab-settings" onclick="hqTab('settings')">Settings</button>
     </div>
 
     <!-- HQ: CLIENTS -->
@@ -220,7 +263,13 @@ details.faq p { color:var(--muted); font-size:13px; line-height:1.5; margin-top:
     <div id="tab-leads" class="tab-view">
       <div class="card">
         <h2>Public Intake Leads (this device)</h2>
-        <p class="small" style="margin-bottom:10px;">Leads saved from the public Get Started form on this device. Convert a lead to a client when the deposit lands.</p>
+        <p class="small" style="margin-bottom:10px;">Leads saved from the public Get Started form on this device — Maps and Real Estate. Convert a Maps lead to a client when the deposit lands.</p>
+        <label class="fld" for="leadFilter">Filter Leads by Division</label>
+        <select id="leadFilter" onchange="renderLeads()">
+          <option value="all">All divisions</option>
+          <option value="maps">Maps only</option>
+          <option value="real-estate">Real Estate only</option>
+        </select>
         <div id="leadsList"></div>
       </div>
     </div>
@@ -264,6 +313,7 @@ details.faq p { color:var(--muted); font-size:13px; line-height:1.5; margin-top:
 • Offer: Full Setup $250 flat — Google Business Profile setup + verification help, Google Maps + Apple Maps, photos/hours/services, starter website, review QR code. $125 down, $125 ONLY when live. Basic Listing $150, due when live (Google listing only — no Apple Maps, no starter website). $25 referral credit.
 • Ownership: Client keeps 100% ownership; S7 Global is manager only.
 • Contact: 470-494-5855 TEXT ONLY — DO NOT CALL | marquezspencervip@gmail.com (faster response) | DM "MAPS" on Instagram @s7globalhq.
+• Real Estate: S7 Global Real Estate is the wholesale division of S7 Global LLC — Metro Atlanta, we buy houses as-is (cash-offer intake for sellers), VIP cash buyers list and deals feed for investors. Facebook: https://www.facebook.com/profile.php?id=61596606044187
 • Honesty: No guaranteed rankings or guaranteed verification — timelines depend on Google.
 • Rule: Never send messages without my approval first.</pre>
         <button class="btn btn-cyan" onclick="copyText('museBrain')">Copy Business Brain Prompt</button>
@@ -286,6 +336,21 @@ details.faq p { color:var(--muted); font-size:13px; line-height:1.5; margin-top:
         <button class="btn btn-lime" onclick="exportData('leads','csv')">Export Leads (CSV)</button>
       </div>
     </div>
+
+    <!-- HQ: SETTINGS (owner only) -->
+    <div id="tab-settings" class="tab-view">
+      <div class="card">
+        <h2>⚙️ Brand Settings — Owner Only</h2>
+        <p class="small" style="margin-bottom:10px;">Saved on this device only (localStorage: s7_brand_settings). These never appear as a prompt to public visitors. A Pay Deposit button shows on the public page ONLY if a Maps payment link is saved here.</p>
+        <label class="fld" for="setPhone">Business Phone (reference)</label>
+        <input type="tel" id="setPhone" placeholder="470-494-5855 (TEXT ONLY)" />
+        <label class="fld" for="setMapPay">Maps Deposit Payment Link (optional)</label>
+        <input type="url" id="setMapPay" placeholder="https://… (leave blank = no Pay button shown)" />
+        <label class="fld" for="setRePay">Real Estate Link (optional)</label>
+        <input type="url" id="setRePay" placeholder="https://… (stored for owner reference)" />
+        <button class="btn btn-lime" onclick="saveBrandSettings()">Save Settings to This Device</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -300,7 +365,7 @@ details.faq p { color:var(--muted); font-size:13px; line-height:1.5; margin-top:
 
 <script>
 /* ============================================================
-   S7 GLOBAL HQ — V3
+   S7 GLOBAL HQ — V4 (Maps + Real Estate divisions, PWA)
    1) CATALOG: single source of truth for plans/services/steps/FAQs.
       All buyer-facing pricing, checklists, comparisons and steps
       are RENDERED from this object — never hard-code prices in HTML.
@@ -320,6 +385,26 @@ const CATALOG = {
     instagram: '@s7globalhq',
     hours: 'Open 24 hours'
   },
+  divisions: [
+    {
+      id: 'maps', name: 'S7 Global LLC \u2014 Map Verification', short: 'Maps', icon: '\uD83D\uDCCD',
+      tagline: 'Get found on Google & Apple Maps',
+      text: 'We set up and verify local shops on Google Search, Google Maps & Apple Maps \u2014 photos, hours, services, a starter website, and a review QR code. Flat pricing, balance only when live, and you keep 100% ownership.'
+    },
+    {
+      id: 'real-estate', name: 'S7 Global Real Estate', short: 'Real Estate', icon: '\uD83C\uDFE0',
+      tagline: 'We buy houses as-is \u2014 Metro Atlanta wholesale',
+      text: 'S7 Global Real Estate is the wholesale division of S7 Global LLC. Sellers: request a cash offer on a house in any condition \u2014 no repairs, no cleaning. Buyers & investors: join the VIP cash buyers list and get the deals feed.',
+      includes: [
+        'Cash-offer intake for sellers \u2014 any condition, sold as-is',
+        'No repairs or cleaning needed to request an offer',
+        'VIP cash buyers list for investors',
+        'Deals feed on matched properties',
+        'Metro Atlanta focus'
+      ],
+      facebook: 'https://www.facebook.com/profile.php?id=61596606044187'
+    }
+  ],
   plans: [
     {
       id: 'full', name: 'Full Setup', featured: true,
@@ -389,6 +474,117 @@ const CATALOG = {
    no network sync is attempted, and everything works without it. */
 const FIREBASE_CONFIG = { apiKey: '', authDomain: '', projectId: '', appId: '' };
 const firebaseEnabled = Boolean(FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.projectId);
+
+
+/* ---------- brand settings (OWNER ONLY, localStorage s7_brand_settings) ----------
+   Public visitors never see a settings prompt. A public Pay button appears
+   ONLY when the owner has saved a Maps payment link here. */
+const SETTINGS_KEY = 's7_brand_settings';
+function loadSettings() {
+  try { const v = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}'); return (v && typeof v === 'object' && !Array.isArray(v)) ? v : {}; }
+  catch (e) { return {}; }
+}
+let brandSettings = loadSettings();
+function persistSettings() { try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(brandSettings)); } catch (e) {} }
+function renderSettingsPublic() {
+  const slot = document.getElementById('buyerPaySlot');
+  if (slot) {
+    const link = String(brandSettings.mapPayLink || '').trim();
+    slot.innerHTML = /^https?:\/\//i.test(link)
+      ? '<a class="btn btn-lime" href="' + esc(link) + '" target="_blank" rel="noopener">Pay Maps Deposit ($125)</a>'
+      : '';
+  }
+  const sf = document.getElementById('setPhone'); if (sf) sf.value = brandSettings.phone || '';
+  const sm = document.getElementById('setMapPay'); if (sm) sm.value = brandSettings.mapPayLink || '';
+  const sr = document.getElementById('setRePay'); if (sr) sr.value = brandSettings.rePayLink || '';
+}
+function saveBrandSettings() {
+  brandSettings = {
+    phone: document.getElementById('setPhone').value.trim(),
+    mapPayLink: document.getElementById('setMapPay').value.trim(),
+    rePayLink: document.getElementById('setRePay').value.trim()
+  };
+  persistSettings(); renderSettingsPublic();
+  toast('Settings saved on this device');
+}
+
+/* ---------- PWA: data-URI manifest + install prompt ---------- */
+const PWA_MANIFEST = {
+  name: 'S7 Global LLC \u2014 Maps & Real Estate', short_name: 'S7 Global',
+  description: 'S7 Global LLC \u2014 Map Verification & S7 Global Real Estate, Metro Atlanta.',
+  start_url: '.', scope: '.', display: 'standalone',
+  background_color: '#060B14', theme_color: '#060B14',
+  icons: [{ src: 'data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2060%2060%22%3E%3Crect%20x%3D%222%22%20y%3D%222%22%20width%3D%2256%22%20height%3D%2256%22%20rx%3D%2214%22%20fill%3D%22%23060B14%22%20stroke%3D%22%2300E5FF%22%20stroke-width%3D%223%22%2F%3E%3Ctext%20x%3D%2215%22%20y%3D%2237%22%20fill%3D%22%2384CC16%22%20font-family%3D%22sans-serif%22%20font-weight%3D%22900%22%20font-size%3D%2222%22%3ES7%3C%2Ftext%3E%3C%2Fsvg%3E', sizes: 'any', type: 'image/svg+xml', purpose: 'any' }]
+};
+let deferredInstallPrompt = null;
+window.addEventListener('beforeinstallprompt', function(e) { e.preventDefault(); deferredInstallPrompt = e; });
+function setupPWA() {
+  try {
+    const link = document.getElementById('pwaManifest');
+    if (link) link.href = 'data:application/manifest+json,' + encodeURIComponent(JSON.stringify(PWA_MANIFEST));
+  } catch (e) {}
+  try {
+    if ('serviceWorker' in navigator && window.Blob && window.URL && window.URL.createObjectURL) {
+      const swUrl = URL.createObjectURL(new Blob(["self.addEventListener('fetch',function(e){});"], { type: 'text/javascript' }));
+      navigator.serviceWorker.register(swUrl).catch(function() {});
+    }
+  } catch (e) {}
+}
+function triggerInstall() {
+  if (deferredInstallPrompt) {
+    deferredInstallPrompt.prompt();
+    if (deferredInstallPrompt.userChoice) deferredInstallPrompt.userChoice.then(function() { deferredInstallPrompt = null; });
+    return;
+  }
+  const hint = document.getElementById('iosInstallHint');
+  if (hint) { hint.style.display = 'block'; if (hint.scrollIntoView) hint.scrollIntoView({ behavior: 'smooth' }); }
+  toast('To install: Share \u2192 Add to Home Screen');
+}
+
+/* ---------- divisions (buyer front) ---------- */
+let activeDivision = 'all';
+function setDivisionFilter(f, el) {
+  activeDivision = f;
+  document.querySelectorAll('#divisionFilters button').forEach(function(b) { b.classList.remove('active'); });
+  if (el) el.classList.add('active');
+  document.querySelectorAll('.division-section').forEach(function(s) {
+    s.style.display = (f === 'all' || s.getAttribute('data-division') === f) ? 'block' : 'none';
+  });
+}
+function renderDivisions() {
+  const filters = [{ id: 'all', short: 'All' }].concat(CATALOG.divisions);
+  document.getElementById('divisionFilters').innerHTML = filters.map(function(d) {
+    return '<button id="divfilter-' + d.id + '"' + (d.id === 'all' ? ' class="active"' : '') + ' onclick="setDivisionFilter(\'' + d.id + '\', this)">' + esc(d.short) + '</button>';
+  }).join('');
+  document.getElementById('divisionCards').innerHTML = CATALOG.divisions.map(function(d) {
+    return '<div class="div-card"><div style="font-size:26px;">' + d.icon + '</div><h3>' + esc(d.name) + '</h3>' +
+      '<div style="color:var(--lime);font-weight:700;font-size:13px;">' + esc(d.tagline) + '</div>' +
+      '<p class="small" style="margin:8px 0 12px;">' + esc(d.text) + '</p>' +
+      '<button class="btn ' + (d.id === 'maps' ? 'btn-lime' : 'btn-cyan') + '" onclick="chooseDivision(\'' + d.id + '\')">' + (d.id === 'maps' ? 'See Maps Plans & Get Started' : 'Request a Cash Offer / Join Buyers List') + '</button></div>';
+  }).join('');
+  const re = CATALOG.divisions.find(function(d) { return d.id === 'real-estate'; });
+  document.getElementById('reDetails').innerHTML =
+    '<p class="small" style="margin-bottom:10px;">' + esc(re.text) + '</p><ul class="checklist">' +
+    re.includes.map(function(i) { return '<li>\u2705 ' + esc(i) + '</li>'; }).join('') + '</ul>' +
+    '<p class="small" style="margin-bottom:12px;">Cash offer intake \u2014 tell us about the property and we will take it from there. Sellers and buyers reach us the same way: text (text only) or email.</p>';
+}
+function setLeadDivision(id) {
+  const sel = document.getElementById('leadDivision');
+  if (sel) sel.value = id;
+  onLeadDivisionChange();
+}
+function onLeadDivisionChange() {
+  const sel = document.getElementById('leadDivision');
+  const isRE = Boolean(sel && sel.value === 'real-estate');
+  document.getElementById('leadMapsFields').style.display = isRE ? 'none' : 'block';
+  document.getElementById('leadReFields').style.display = isRE ? 'block' : 'none';
+}
+function chooseDivision(id) {
+  const btn = document.getElementById('divfilter-' + id);
+  setDivisionFilter(id, btn);
+  setLeadDivision(id);
+  goSection('get-started');
+}
 
 /* ---------- helpers ---------- */
 function esc(s) {
@@ -486,6 +682,12 @@ function renderCatalog() {
   document.getElementById('faqList').innerHTML = CATALOG.faqs.map(function(f) {
     return '<details class="faq"><summary>' + esc(f.q) + '</summary><p>' + esc(f.a) + '</p></details>';
   }).join('');
+  document.getElementById('leadDivision').innerHTML = CATALOG.divisions.map(function(d) {
+    return '<option value="' + d.id + '">' + esc(d.name) + '</option>';
+  }).join('');
+  renderDivisions();
+  onLeadDivisionChange();
+  renderSettingsPublic();
   document.getElementById('leadPlan').innerHTML = planOptions('full');
   document.getElementById('cPlan').innerHTML = planOptions('full');
   document.getElementById('sPlan').innerHTML = planOptions('full');
@@ -499,37 +701,55 @@ function choosePlan(id) {
 /* ---------- leads DB (public intake) ---------- */
 let leads = loadStore('s7_leads');
 function submitLead() {
+  const division = (document.getElementById('leadDivision') && document.getElementById('leadDivision').value) || 'maps';
   const biz = document.getElementById('leadBiz').value.trim();
   const owner = document.getElementById('leadOwner').value.trim();
   const phone = document.getElementById('leadPhone').value.trim();
   const city = document.getElementById('leadCity').value.trim();
-  const plan = document.getElementById('leadPlan').value;
   const msg = document.getElementById('leadMsg').value.trim();
-  if (!biz) { toast('Enter your business name'); return; }
+  if (!biz) { toast('Enter your name or business name'); return; }
   if (!phone) { toast('Enter a phone number so we can text you back'); return; }
-  const lead = { id: Date.now(), biz: biz, owner: owner, phone: phone, city: city, plan: plan, msg: msg, status: 'new', createdAt: new Date().toISOString() };
+  let lead, body, subject;
+  if (division === 'real-estate') {
+    const leadType = document.getElementById('leadType').value;
+    const address = document.getElementById('leadAddr').value.trim();
+    const timeline = document.getElementById('leadTimeline').value.trim();
+    lead = { id: Date.now(), division: 'real-estate', leadType: leadType, biz: biz, owner: owner, phone: phone, city: city, plan: '', address: address, timeline: timeline, msg: msg, status: 'new', createdAt: new Date().toISOString() };
+    body = 'REAL ESTATE \u2014 New ' + leadType + ' request: ' + biz + (owner ? ' (' + owner + ')' : '') + ', Phone: ' + phone + (address ? ', Property: ' + address : '') + (city ? ', Area: ' + city : '') + (timeline ? ', Timeline: ' + timeline : '') + (msg ? ', Details: ' + msg : '');
+    subject = 'Real Estate Request \u2014 ' + biz;
+  } else {
+    const plan = document.getElementById('leadPlan').value;
+    const p = planOf(plan);
+    lead = { id: Date.now(), division: 'maps', leadType: '', biz: biz, owner: owner, phone: phone, city: city, plan: plan, address: '', timeline: '', msg: msg, status: 'new', createdAt: new Date().toISOString() };
+    body = 'MAPS \u2014 New request: ' + biz + (owner ? ' (' + owner + ')' : '') + ', ' + (city || 'Metro Atlanta') + ', Phone: ' + phone + ', Plan: ' + p.name + ' $' + p.price + (msg ? ', Note: ' + msg : '');
+    subject = 'MAPS Setup Request \u2014 ' + biz;
+  }
   leads.unshift(lead); saveStore('s7_leads', leads); renderLeads();
-  const p = planOf(plan);
-  const body = 'MAPS — New request: ' + biz + (owner ? ' (' + owner + ')' : '') + ', ' + (city || 'Metro Atlanta') + ', Phone: ' + phone + ', Plan: ' + p.name + ' $' + p.price + (msg ? ', Note: ' + msg : '');
   const box = document.getElementById('leadConfirm');
   box.style.display = 'block';
   box.innerHTML = '<div style="background:rgba(132,204,22,.12);border:1px solid var(--lime);border-radius:10px;padding:12px;margin-top:6px;">' +
-    '<div style="font-weight:800;color:var(--lime);margin-bottom:6px;">✅ Request saved on this device</div>' +
-    '<p class="small" style="margin-bottom:10px;">Last step — send it to S7 Global so we actually receive it:</p>' +
-    '<a class="btn btn-lime" href="sms:' + CATALOG.business.phoneSms + '?&amp;body=' + encodeURIComponent(body) + '">Text It — 470-494-5855 (Text Only)</a>' +
-    '<a class="btn btn-outline" href="mailto:' + CATALOG.business.email + '?subject=' + encodeURIComponent('MAPS Setup Request — ' + biz) + '&amp;body=' + encodeURIComponent(body) + '">Email It — Faster Response</a></div>';
+    '<div style="font-weight:800;color:var(--lime);margin-bottom:6px;">\u2705 Request saved on this device</div>' +
+    '<p class="small" style="margin-bottom:10px;">Last step \u2014 send it to S7 Global so we actually receive it:</p>' +
+    '<a class="btn btn-lime" href="sms:' + CATALOG.business.phoneSms + '?&amp;body=' + encodeURIComponent(body) + '">Text It \u2014 470-494-5855 (Text Only)</a>' +
+    '<a class="btn btn-outline" href="mailto:' + CATALOG.business.email + '?subject=' + encodeURIComponent(subject) + '&amp;body=' + encodeURIComponent(body) + '">Email It \u2014 Faster Response</a></div>';
   toast('Request saved');
   if (box.scrollIntoView) box.scrollIntoView({ behavior: 'smooth' });
 }
 function renderLeads() {
   const list = document.getElementById('leadsList');
-  if (!leads.length) { list.innerHTML = '<p class="small">No leads saved on this device yet.</p>'; return; }
-  list.innerHTML = leads.map(function(l) {
-    const p = planOf(l.plan);
+  const filterEl = document.getElementById('leadFilter');
+  const filter = filterEl ? filterEl.value : 'all';
+  const shown = leads.filter(function(l) { return filter === 'all' || (l.division || 'maps') === filter; });
+  if (!shown.length) { list.innerHTML = '<p class="small">No leads in this view yet.</p>'; return; }
+  list.innerHTML = shown.map(function(l) {
+    const isRE = (l.division || 'maps') === 'real-estate';
+    const detail = isRE
+      ? esc(l.leadType || 'Seller') + ' \u2022 Real Estate' + (l.address ? ' \u2022 ' + esc(l.address) : '') + (l.timeline ? ' \u2022 ' + esc(l.timeline) : '')
+      : esc(planOf(l.plan).name) + ' $' + planOf(l.plan).price + ' \u2022 Maps';
     return '<div class="client-item"><div style="font-weight:700;font-size:14px;">' + esc(l.biz) + '</div>' +
-      '<div style="font-size:12px;color:var(--muted);">' + esc(l.owner || 'Owner n/a') + ' • ' + esc(l.city || 'City n/a') + ' • ' + esc(l.phone) + '</div>' +
-      '<div style="font-size:12px;color:var(--muted);">' + esc(p.name) + ' $' + p.price + ' • ' + esc((l.createdAt || '').slice(0, 10)) + (l.msg ? ' • ' + esc(l.msg) : '') + '</div>' +
-      '<div style="margin-top:8px;"><button class="btn btn-lime btn-small" onclick="leadToClient(' + l.id + ')">Convert to Client</button>' +
+      '<div style="font-size:12px;color:var(--muted);">' + esc(l.owner || 'Name n/a') + ' \u2022 ' + esc(l.city || 'City n/a') + ' \u2022 ' + esc(l.phone) + '</div>' +
+      '<div style="font-size:12px;color:var(--muted);">' + detail + ' \u2022 ' + esc((l.createdAt || '').slice(0, 10)) + (l.msg ? ' \u2022 ' + esc(l.msg) : '') + '</div>' +
+      '<div style="margin-top:8px;">' + (isRE ? '' : '<button class="btn btn-lime btn-small" onclick="leadToClient(' + l.id + ')">Convert to Client</button>') +
       '<button class="btn btn-danger btn-small" onclick="deleteLead(' + l.id + ')">Delete</button></div></div>';
   }).join('');
 }
@@ -541,6 +761,7 @@ function deleteLead(id) {
 function leadToClient(id) {
   const l = leads.find(function(x) { return x.id === id; });
   if (!l) return;
+  if ((l.division || 'maps') === 'real-estate') { toast('Real Estate leads stay in Leads \u2014 clients are Maps only'); return; }
   clients.unshift({ id: Date.now(), name: l.biz, owner: l.owner || '', email: '', phone: l.phone || '', city: l.city || 'Atlanta, GA', plan: l.plan || 'full', stage: 'deposit', createdAt: new Date().toISOString() });
   leads = leads.filter(function(x) { return x.id !== id; });
   saveStore('s7_leads', leads); saveRender(); renderLeads();
@@ -698,7 +919,7 @@ function exportData(store, fmt) {
   if (!rows.length) { toast('Nothing to export yet'); return; }
   if (fmt === 'json') download('s7-' + store + '.json', JSON.stringify(rows, null, 2), 'application/json');
   else if (store === 'clients') download('s7-clients.csv', toCsv(rows, ['id', 'name', 'owner', 'email', 'phone', 'city', 'plan', 'stage', 'createdAt']), 'text/csv');
-  else download('s7-leads.csv', toCsv(rows, ['id', 'biz', 'owner', 'phone', 'city', 'plan', 'msg', 'status', 'createdAt']), 'text/csv');
+  else download('s7-leads.csv', toCsv(rows, ['id', 'division', 'leadType', 'biz', 'owner', 'phone', 'city', 'plan', 'address', 'timeline', 'msg', 'status', 'createdAt']), 'text/csv');
   toast('Export downloaded');
 }
 
@@ -738,6 +959,7 @@ function exportData(store, fmt) {
 if ('serviceWorker' in navigator) { window.addEventListener('load', function() { navigator.serviceWorker.register('sw.js').catch(function() {}); }); }
 
 /* ---------- init ---------- */
+setupPWA();
 renderCatalog();
 saveRender();
 renderLeads();
