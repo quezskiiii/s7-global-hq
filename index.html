@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 <meta name="theme-color" content="#060B14" />
-<meta name="description" content="S7 Global LLC — Maps & Real Estate. Get found on Google & Apple Maps ($250 flat Maps setup) or request a cash offer on a Metro Atlanta house as-is with S7 Global Real Estate." />
+<meta name="description" content="S7 Global LLC — Maps, Moving & Real Estate. Get found on Google & Apple Maps ($250 flat Maps setup), book labor-only moving help in Metro Atlanta (2 movers $85/hr, 3 movers $125/hr), or request a cash offer on a house as-is." />
 <link id="pwaManifest" rel="manifest" href="manifest.webmanifest" />
 <link rel="icon" type="image/svg+xml" href="icon.svg" />
 <link rel="apple-touch-icon" href="icon.svg" />
@@ -109,7 +109,7 @@ nav button { min-height:44px; }
     <svg width="28" height="28" viewBox="0 0 60 60" fill="none"><rect x="2" y="2" width="56" height="56" rx="14" fill="#060B14" stroke="#00E5FF" stroke-width="3"/><text x="15" y="37" fill="#84CC16" font-family="sans-serif" font-weight="900" font-size="22">S7</text></svg>
     S7 GLOBAL LLC
   </div>
-  <span class="badge">MAPS • REAL ESTATE</span>
+  <span class="badge">MAPS • MOVING • REAL ESTATE</span>
   <div class="nav-pills" id="topPills">
     <button data-navpill="home" class="active" onclick="navigateTo('home')">Home</button>
     <button data-navpill="divisions" onclick="navigateTo('divisions')">Divisions</button>
@@ -125,17 +125,18 @@ nav button { min-height:44px; }
   <div class="container">
     <div class="card hero" id="sec-home">
       <div style="font-size:34px;">📍</div>
-      <h1>S7 Global LLC — <span>Maps &amp; Real Estate.</span></h1>
-      <p>Two ways we help Metro Atlanta: <strong style="color:var(--text);">📍 Maps</strong> — we set up and verify your shop on Google Search, Google Maps &amp; Apple Maps so nearby customers find you. <strong style="color:var(--text);">🏠 Real Estate</strong> — S7 Global Real Estate buys houses as-is and connects cash buyers with deals.</p>
+      <h1>S7 Global LLC — <span>Maps, Moving &amp; Real Estate.</span></h1>
+      <p>Three ways we help Metro Atlanta: <strong style="color:var(--text);">📍 Maps</strong> — we set up and verify your shop on Google Search, Google Maps &amp; Apple Maps so nearby customers find you. <strong style="color:var(--text);">🚚 Moving</strong> — S7 Moving &amp; Logistics brings the crew: you rent the truck, we load, unload &amp; pack, from $85/hr. <strong style="color:var(--text);">🏠 Real Estate</strong> — S7 Global Real Estate buys houses as-is and connects cash buyers with deals.</p>
       <a class="btn btn-lime" href="#get-started" onclick="goSection('get-started');return false;">Get Started — $125 Down</a>
       <a class="btn btn-outline" href="#plans" onclick="goSection('plans');return false;">See Plans &amp; Pricing</a>
-      <a class="btn btn-cyan" href="#real-estate" onclick="goSection('real-estate');return false;">🏠 Sell a House As-Is — Request a Cash Offer</a>
+      <a class="btn btn-cyan" href="moving.html">🚚 Book Moving Help — From $85/hr</a>
+      <a class="btn btn-outline" href="#real-estate" onclick="goSection('real-estate');return false;">🏠 Sell a House As-Is — Request a Cash Offer</a>
       <p class="small" style="margin:0;">Flat pricing. No monthly fee required. You keep 100% ownership of your listings — S7 Global is manager only.</p>
       <p class="small" id="iosInstallHint" style="display:none;margin-top:10px;">📲 To install this app on iPhone: tap the Share button, then “Add to Home Screen.”</p>
     </div>
 
     <div class="card" id="whatsNew" style="padding:12px 16px;">
-      <p class="small" style="margin:0;"><strong style="color:var(--lime);">🆕 What's new — V6.4:</strong> Maps Care is here. After your listing goes live, keep it working for $99/mo — monthly profile checks &amp; updates, Google posts, review replies, and a monthly report. You keep 100% ownership. See Plans &amp; Pricing to subscribe.</p>
+      <p class="small" style="margin:0;"><strong style="color:var(--lime);">🆕 What's new — V6.5:</strong> S7 Moving &amp; Logistics is now linked right here — one company, one number. Book labor-only moving help on the <a href="moving.html" style="color:var(--cyan);">Moving page</a> (2 movers $85/hr, 3 movers $125/hr, $50 deposit locks your date), and Maps Care keeps your listing working for $99/mo after you go live.</p>
     </div>
 
     <div class="card" id="sec-process">
@@ -146,7 +147,7 @@ nav button { min-height:44px; }
 
     <div class="card" id="divisions">
       <h2>Our Divisions</h2>
-      <p class="small" style="margin-bottom:12px;">One company, two divisions — pick your path. Everything below is run by S7 Global LLC in Metro Atlanta.</p>
+      <p class="small" style="margin-bottom:12px;">One company, three divisions — pick your path. Everything below is run by S7 Global LLC in Metro Atlanta.</p>
       <div class="div-filters" id="divisionFilters"></div>
       <div id="divisionCards"></div>
     </div>
@@ -209,6 +210,10 @@ nav button { min-height:44px; }
           <option value="Heavy">Heavy — major rehab</option>
         </select>
       </div>
+      <div id="leadMovingFields" style="display:none;">
+        <p class="small" style="margin:4px 0 10px;">🚚 Moving bookings live on the <a href="moving.html" style="color:var(--cyan);">S7 Moving &amp; Logistics page</a> — rates, a price estimator, and the $50 deposit link are all there. You can still save a request here and text it to us, or book in one tap:</p>
+        <a class="btn btn-cyan" href="moving.html">Open the Moving Page — Book &amp; Pay Deposit</a>
+      </div>
       <label class="fld" for="leadMsg">Anything we should know? (optional)</label>
       <textarea id="leadMsg" rows="2" placeholder="Business details — or property condition / situation for real estate..."></textarea>
       <button class="btn btn-lime" onclick="submitLead()">Save My Request</button>
@@ -222,16 +227,32 @@ nav button { min-height:44px; }
       <button class="btn btn-lime" onclick="chooseDivision('real-estate')">Request a Cash Offer / Join the Buyers List</button>
     </div>
 
+    <div class="card division-section" data-division="moving" id="moving">
+      <h2>🚚 S7 Moving &amp; Logistics</h2>
+      <p class="small" style="margin-bottom:10px;">Labor-only moving help in Metro Atlanta — you rent the truck or PODS, we bring the muscle. Load / unload, furniture moving, and Pack &amp; Prep crews.</p>
+      <ul class="checklist">
+        <li>✅ 2 movers — $85/hr &nbsp;•&nbsp; 3 movers — $125/hr &nbsp;•&nbsp; Pack &amp; Prep (2 packers) — $75/hr</li>
+        <li>✅ 2-hour minimum &nbsp;•&nbsp; $50 deposit locks your date</li>
+        <li>✅ East Point • College Park • Decatur • Downtown Atlanta • Metro Atlanta</li>
+        <li>✅ $25 referral bonus per booked move</li>
+      </ul>
+      <a class="btn btn-lime" href="moving.html">Book Moving Help — Rates, Estimator &amp; Deposit</a>
+      <a class="btn btn-cyan" href="sms:+14704945855?&amp;body=MOVE">Text MOVE to 470-494-5855 (Text Only)</a>
+      <a class="btn btn-outline" href="https://buy.stripe.com/aFa3cx40xglFauz3z7cEw12" target="_blank" rel="noopener">Pay $50 Moving Deposit</a>
+    </div>
+
     <div class="card">
       <h2>Contact S7 Global LLC</h2>
       <p style="font-size:14px;line-height:1.7;">
         📱 <strong>470-494-5855 — TEXT ONLY — DO NOT CALL</strong><br/>
         <span class="small">Text "MAPS" and we'll reply with next steps.</span><br/>
         ✉️ <a href="mailto:marquezspencervip@gmail.com" style="color:var(--cyan);">marquezspencervip@gmail.com</a> <span class="small">(fastest response)</span><br/>
-        📸 Instagram DM: <strong>@s7globalhq</strong> — DM "MAPS"<br/>
+        📸 Instagram DM: <strong>@s7globalhq</strong> — DM "MAPS" or "MOVE"<br/>
+        🚚 Moving: <a href="moving.html" style="color:var(--cyan);">S7 Moving &amp; Logistics — book &amp; pay the $50 deposit</a><br/>
         <span class="small">S7 Global LLC • Marquez Spencer • Metro Atlanta / East Point, GA • Open 24 hours</span>
       </p>
       <a class="btn btn-cyan" href="sms:+14704945855?&amp;body=MAPS">Text MAPS to 470-494-5855 (Text Only)</a>
+      <a class="btn btn-outline" href="sms:+14704945855?&amp;body=MOVE">Text MOVE to 470-494-5855 (Text Only)</a>
       <a class="btn btn-outline" href="mailto:marquezspencervip@gmail.com?subject=MAPS%20Setup%20Request">Email for a Faster Response</a>
       <div id="buyerPaySlot"></div>
     </div>
@@ -332,6 +353,7 @@ nav button { min-height:44px; }
 • Offer: Full Setup $250 flat — Google Business Profile setup + verification help, Google Maps + Apple Maps, photos/hours/services, starter website, review QR code. $125 down, $125 ONLY when live. Basic Listing $150, due when live (Google listing only — no Apple Maps, no starter website). $25 referral credit.
 • Ownership: Client keeps 100% ownership; S7 Global is manager only.
 • Contact: 470-494-5855 TEXT ONLY — DO NOT CALL | marquezspencervip@gmail.com (faster response) | DM "MAPS" on Instagram @s7globalhq.
+• Moving: S7 Moving & Logistics is the labor-only moving division of S7 Global LLC — customer rents their own truck/PODS, S7 provides the crew. 2 movers $85/hr, 3 movers $125/hr, Pack & Prep $75/hr, all 2-hour minimum; $50 deposit (Stripe: https://buy.stripe.com/aFa3cx40xglFauz3z7cEw12) locks the date. Booking page: https://quezskiiii.github.io/s7-global-hq/moving.html — text "MOVE" to 470-494-5855.
 • Real Estate: S7 Global Real Estate is the wholesale division of S7 Global LLC — Metro Atlanta, we buy houses as-is (cash-offer intake for sellers), VIP cash buyers list and deals feed for investors. Facebook: https://www.facebook.com/profile.php?id=61596606044187
 • Honesty: No guaranteed rankings or guaranteed verification — timelines depend on Google.
 • Rule: Never send messages without my approval first.</pre>
@@ -395,11 +417,12 @@ nav button { min-height:44px; }
   <div id="drawerLookupResult" style="display:none;"></div>
   <h3>Platform Navigation</h3>
   <button class="drawer-link" onclick="drawerGo('sec-home')">🏠 Home Overview</button>
-  <button class="drawer-link" onclick="drawerGo('divisions')">🏢 All Divisions (2 Active)</button>
+  <button class="drawer-link" onclick="drawerGo('divisions')">🏢 All Divisions (3 Active)</button>
   <button class="drawer-link" onclick="drawerGo('sec-process')">⚡ How It Works — 3 Steps</button>
   <button class="drawer-link" onclick="drawerGo('plans')">💲 Plans &amp; Pricing</button>
   <h3>Direct Division Booking</h3>
   <button class="drawer-link" onclick="drawerBook('maps')">📍 Map Verification — $250 Flat<br/><span style="font-size:12px;color:var(--muted);font-weight:600;">Google Search, Google Maps &amp; Apple Maps (50/50 split)</span></button>
+  <a class="drawer-link" href="moving.html" style="display:block;text-decoration:none;">🚚 Moving &amp; Logistics — Book Moving Help<br/><span style="font-size:12px;color:var(--muted);font-weight:600;">2 movers $85/hr, 3 movers $125/hr — $50 deposit locks your date</span></a>
   <button class="drawer-link" onclick="drawerBook('real-estate')">🏠 Real Estate — Cash Offer Intake<br/><span style="font-size:12px;color:var(--muted);font-weight:600;">Sell as-is, join the VIP cash buyers list, or get deals</span></button>
   <h3>Your Order &amp; S7 Global</h3>
   <button class="drawer-link" onclick="drawerTrack()">🔍 Track Order Status</button>
@@ -467,6 +490,19 @@ const CATALOG = {
       id: 'maps', name: 'S7 Global LLC \u2014 Map Verification', short: 'Maps', icon: '\uD83D\uDCCD',
       tagline: 'Get found on Google & Apple Maps',
       text: 'We set up and verify local shops on Google Search, Google Maps & Apple Maps \u2014 photos, hours, services, a starter website, and a review QR code. Flat pricing, balance only when live, and you keep 100% ownership.'
+    },
+    {
+      id: 'moving', name: 'S7 Moving & Logistics', short: 'Moving', icon: '\uD83D\uDE9A',
+      tagline: 'You rent the truck. We bring the muscle.',
+      text: 'Labor-only moving help in Metro Atlanta: load / unload, furniture moving, and Pack & Prep crews. 2 movers $85/hr, 3 movers $125/hr, Pack & Prep $75/hr — 2-hour minimum, $50 deposit locks your date.',
+      url: 'moving.html', cta: 'Book Moving Help — See Rates & Deposit',
+      includes: [
+        'Load / unload + furniture moving',
+        'Pack & Prep crews',
+        'East Point, College Park, Decatur, Downtown Atlanta & Metro Atlanta',
+        '$50 deposit locks your date',
+        '$25 referral bonus per booked move'
+      ]
     },
     {
       id: 'real-estate', name: 'S7 Global Real Estate', short: 'Real Estate', icon: '\uD83C\uDFE0',
@@ -701,7 +737,7 @@ function careBtnHTML(rec) {
 /* ---------- PWA: data-URI manifest + install prompt ---------- */
 const PWA_MANIFEST = {
   name: 'S7 Global LLC \u2014 Maps & Real Estate', short_name: 'S7 Global',
-  description: 'S7 Global LLC \u2014 Map Verification & S7 Global Real Estate, Metro Atlanta.',
+  description: 'S7 Global LLC \u2014 Map Verification, S7 Moving & Logistics & S7 Global Real Estate, Metro Atlanta.',
   start_url: '.', scope: '.', display: 'standalone',
   background_color: '#060B14', theme_color: '#060B14',
   icons: [{ src: 'data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2060%2060%22%3E%3Crect%20x%3D%222%22%20y%3D%222%22%20width%3D%2256%22%20height%3D%2256%22%20rx%3D%2214%22%20fill%3D%22%23060B14%22%20stroke%3D%22%2300E5FF%22%20stroke-width%3D%223%22%2F%3E%3Ctext%20x%3D%2215%22%20y%3D%2237%22%20fill%3D%22%2384CC16%22%20font-family%3D%22sans-serif%22%20font-weight%3D%22900%22%20font-size%3D%2222%22%3ES7%3C%2Ftext%3E%3C%2Fsvg%3E', sizes: 'any', type: 'image/svg+xml', purpose: 'any' }]
@@ -750,7 +786,9 @@ function renderDivisions() {
     return '<div class="div-card"><div style="font-size:26px;">' + d.icon + '</div><h3>' + esc(d.name) + '</h3>' +
       '<div style="color:var(--lime);font-weight:700;font-size:13px;">' + esc(d.tagline) + '</div>' +
       '<p class="small" style="margin:8px 0 12px;">' + esc(d.text) + '</p>' +
-      '<button class="btn ' + (d.id === 'maps' ? 'btn-lime' : 'btn-cyan') + '" onclick="chooseDivision(\'' + d.id + '\')">' + (d.id === 'maps' ? 'See Maps Plans & Get Started' : 'Request a Cash Offer / Join Buyers List') + '</button></div>';
+      (d.url
+        ? '<a class="btn btn-cyan" href="' + esc(d.url) + '">' + esc(d.cta || 'Open') + '</a></div>'
+        : '<button class="btn ' + (d.id === 'maps' ? 'btn-lime' : 'btn-cyan') + '" onclick="chooseDivision(\'' + d.id + '\')">' + (d.id === 'maps' ? 'See Maps Plans & Get Started' : 'Request a Cash Offer / Join Buyers List') + '</button></div>');
   }).join('');
   const re = CATALOG.divisions.find(function(d) { return d.id === 'real-estate'; });
   document.getElementById('reDetails').innerHTML =
@@ -766,8 +804,10 @@ function setLeadDivision(id) {
 function onLeadDivisionChange() {
   const sel = document.getElementById('leadDivision');
   const isRE = Boolean(sel && sel.value === 'real-estate');
-  document.getElementById('leadMapsFields').style.display = isRE ? 'none' : 'block';
+  const isMoving = Boolean(sel && sel.value === 'moving');
+  document.getElementById('leadMapsFields').style.display = (isRE || isMoving) ? 'none' : 'block';
   document.getElementById('leadReFields').style.display = isRE ? 'block' : 'none';
+  const mv = document.getElementById('leadMovingFields'); if (mv) mv.style.display = isMoving ? 'block' : 'none';
 }
 function chooseDivision(id) {
   const btn = document.getElementById('divfilter-' + id);
@@ -1106,6 +1146,10 @@ function submitLead() {
     lead = { id: Date.now(), trackId: genTrackId(), division: 'real-estate', leadType: leadType, biz: biz, owner: owner, phone: phone, city: city, plan: '', address: address, timeline: timeline, askingPrice: askingPrice, repairLevel: repairLevel, msg: msg, status: 'new', createdAt: new Date().toISOString() };
     body = 'REAL ESTATE \u2014 New ' + leadType + ' request: ' + biz + (owner ? ' (' + owner + ')' : '') + ', Phone: ' + phone + (address ? ', Property: ' + address : '') + (city ? ', Area: ' + city : '') + (timeline ? ', Timeline: ' + timeline : '') + (askingPrice ? ', Asking: ' + askingPrice : '') + (repairLevel ? ', Repairs: ' + repairLevel : '') + (msg ? ', Details: ' + msg : '');
     subject = 'Real Estate Request \u2014 ' + biz;
+  } else if (division === 'moving') {
+    lead = { id: Date.now(), trackId: genTrackId(), division: 'moving', leadType: '', biz: biz, owner: owner, phone: phone, city: city, plan: '', address: '', timeline: '', askingPrice: '', repairLevel: '', msg: msg, status: 'new', createdAt: new Date().toISOString() };
+    body = 'MOVE \u2014 New moving request: ' + biz + (owner ? ' (' + owner + ')' : '') + ', Phone: ' + phone + (city ? ', Area: ' + city : '') + (msg ? ', Details: ' + msg : '') + ' \u2014 Book & pay the $50 deposit: https://buy.stripe.com/aFa3cx40xglFauz3z7cEw12';
+    subject = 'Moving Request \u2014 ' + biz;
   } else {
     const plan = document.getElementById('leadPlan').value;
     const p = planOf(plan);
